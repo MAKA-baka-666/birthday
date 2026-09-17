@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>生日快乐</title>
+<style>
+  :root {
+    --bg: #0e1016;
+    --muted: rgba(255, 255, 255, 0.28);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+
+  /* 深色底移到 html 上，让 z-index:-1 的 canvas 落在其上方、正文下方 */
+  html {
+    background:
+      radial-gradient(1200px 700px at 50% 20%, #1b1f2e 0%, var(--bg) 60%);
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+      "Noto Sans SC", "Source Han Sans SC", sans-serif;
+    overflow: hidden;
+  }
+
+  #matrix-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    display: block;
+  }
+
+  /* 共享文字格式：Georgia 衬线 + 白色 + 左对齐 */
+  .scramble,
+  .text-preview {
+    font-family: Georgia, "Times New Roman", "SimSun", "Songti SC", "Noto Serif SC", serif;
+    font-size: 36px;
+    font-weight: 400;
+    letter-spacing: 4px;
+    line-height: 1.5;
+    color: #ffffff;
+    text-align: center;
+  }
+
+  .scramble {
+    margin: 0;
+    /* 中文字符本身即为全宽（1em），配合等宽数值字形保证宽度稳定、不抖动 */
+    font-variant-numeric: tabular-nums;
+  }
+
+  .text-preview {
+    margin: 0;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  }
+
+  .scramble-char {
+    display: inline-block;
+    color: var(--muted);
+    text-shadow: 0 0 14px rgba(0, 0, 0, 0.55), 0 1px 4px rgba(0, 0, 0, 0.7);
+    transition: color 0.25s ease;
+  }
+
+  .scramble-char.locked {
+    color: #ffffff;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.35), 0 1px 4px rgba(0, 0, 0, 0.6);
+    animation: pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes pop {
+    0%   { transform: scale(0.6); opacity: 0.3; }
+    100% { transform: scale(1);   opacity: 1; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scramble-char.locked {
+      animation: none;
+      color: #ffffff;
+    }
+  }
+</style>
+</head>
+<body>
+  <canvas id="matrix-bg" aria-hidden="true"></canvas>
+  <!-- aria-label 暴露最终字符串；翻滚中的 span 全部 aria-hidden，避免读屏读到乱码 -->
+  <div class="greeting">
+    <h1 class="scramble" id="scramble" aria-label="生日快乐"></h1>
+    <p class="text-preview" id="scramble-en" aria-label="Happy Birthday"></p>
+  </div>
+
+  <script>
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // 中文翻滚字形池：生僻 CJK + 全角数字/字母/符号。
+    // 全部为全角字符（恒 1em），翻滚时宽度不会抖动。
+    const CJK_GLYPHS = (() => {
+      let s = "龘靐齉爩麤龗齾龖鱻爨癵籲饢驫纛鸞麣";
+      for (let c = 0xff10; c <= 0xff19; c++) s += String.fromCharCode(c); // ０-９ 全角数字
+      for (let c = 0xff21; c <= 0xff3a; c++) s += String.fromCharCode(c); // Ａ-Ｚ 全角大写
+      for (let c = 0xff41; c <= 0xff5a; c++) s += String.fromCharCode(c); // ａ-ｚ 全角小写
+      for (let c = 0xff01; c <= 0xff5e; c++) s += String.fromCharCode(c); // ！-～ 全角符号
+      return s;
+    })();
+
+    // 英文翻滚字形池：半角字母 + 数字
+    const LATIN_GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    const pick = (s) => s[Math.floor(Math.random() * s.length)];
+
+    function buildSpans(el, text) {
+      const frag = document.createDocumentFragment();
+      const spans = [];
+      for (const ch of text) {
+        const span = document.createElement("span");
+        span.className = "scramble-char";
+        span.setAttribute("aria-hidden", "true");
+        span.textContent = ch;
+        frag.appendChild(span);
+        spans.push(span);
+      }
+      el.replaceChildren(frag);
+      return spans;
+    }
+
+    function scramble(el, text, glyphs, opts) {
+      const spans = buildSpans(el, text);
+
+      // 固定每个字符宽度（含继承的 letter-spacing），避免比例字体翻滚时整行抖动
+      spans.forEach((span, i) => {
+        if (text[i] === " ") return;
+        span.style.width = span.getBoundingClientRect().width + "px";
+        span.style.textAlign = "center";
+      });
+
+      if (prefersReduced) {
+        spans.forEach((span) => span.classList.add("locked"));
+        if (opts.onDone) opts.onDone();
+        return;
+      }
+
+      const { charDelay, lockJitter, scrambleInterval, onDone } = opts;
+      const start = performance.now();
+
+      spans.forEach((span, i) => {
+        if (text[i] === " ") return; // 空格不参与翻滚
+        span.dataset.deadline = start + i * charDelay + Math.random() * lockJitter;
+        span.textContent = pick(glyphs);
+      });
+
+      let lastScramble = 0;
+      function frame(now) {
+        let pending = false;
+        const doScramble = now - lastScramble >= scrambleInterval;
+        if (doScramble) lastScramble = now;
+
+        for (let i = 0; i < spans.length; i++) {
+          const span = spans[i];
+          if (text[i] === " ") continue;
+          if (now >= Number(span.dataset.deadline)) {
+            if (span.textContent !== text[i]) {
+              span.textContent = text[i];
+              span.classList.add("locked");
+            }
+          } else {
+            if (doScramble) span.textContent = pick(glyphs);
+            pending = true;
+          }
+        }
+        if (pending) requestAnimationFrame(frame);
+        else if (onDone) onDone();
+      }
+      requestAnimationFrame(frame);
+    }
+
+    // 中文先翻滚落定，完成后英文才开始翻滚
+    scramble(document.getElementById("scramble"), "生日快乐", CJK_GLYPHS, {
+      charDelay: 380,
+      lockJitter: 320,
+      scrambleInterval: 55,
+      onDone: () => scramble(document.getElementById("scramble-en"), "Happy Birthday", LATIN_GLYPHS, {
+        charDelay: 180,
+        lockJitter: 160,
+        scrambleInterval: 55,
+      }),
+    });
+  </script>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById("matrix-bg");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      // 字符池：数字 + 大小写字母 + 片假名 + 特殊符号
+      const CHARS = (() => {
+        let s = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        s += "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン";
+        s += "ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝ";
+        s += "+-*/=<>:;|/\\[]{}()!@#$%^&";
+        return s;
+      })();
+
+      // 三层景深：近景 / 中景 / 远景
+      const LAYERS = [
+        { font: 22, gap: 14, minSpeed: 200, maxSpeed: 400, baseAlpha: 0.95, blur: 0,
+          headColor: "#eafff2", trailColor: "#00FF41", minTrail: 9, maxTrail: 18 },
+        { font: 13, gap: 9,  minSpeed: 110, maxSpeed: 210, baseAlpha: 0.55, blur: 0,
+          headColor: "#a5ffbf", trailColor: "#00FF41", minTrail: 6, maxTrail: 12 },
+        { font: 8,  gap: 6,  minSpeed: 55,  maxSpeed: 105, baseAlpha: 0.30, blur: 2,
+          headColor: "#8affa8", trailColor: "#00FF41", minTrail: 4, maxTrail: 8 },
+      ];
+
+      const rand = (a, b) => a + Math.random() * (b - a);
+      const pick = (s) => s[(Math.random() * s.length) | 0];
+
+      let W = 0, H = 0;
+      let columns = [];
+
+      function makeColumn(layer, x) {
+        const trailLen = (rand(layer.minTrail, layer.maxTrail)) | 0;
+        const glyphs = new Array(trailLen);
+        for (let i = 0; i < trailLen; i++) glyphs[i] = pick(CHARS);
+        return {
+          x,
+          y: rand(-H, 0),
+          speed: rand(layer.minSpeed, layer.maxSpeed),
+          glyphs,
+          trailLen,
+        };
+      }
+
+      function createColumns() {
+        columns = LAYERS.map((layer) => {
+          const arr = [];
+          const count = Math.ceil(W / layer.gap) + 1;
+          for (let i = 0; i < count; i++) {
+            arr.push(makeColumn(layer, i * layer.gap + rand(-2, 2)));
+          }
+          return arr;
+        });
+      }
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      function resize() {
+        W = window.innerWidth;
+        H = window.innerHeight;
+        canvas.width = Math.floor(W * dpr);
+        canvas.height = Math.floor(H * dpr);
+        canvas.style.width = W + "px";
+        canvas.style.height = H + "px";
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        createColumns();
+      }
+      window.addEventListener("resize", resize);
+      resize();
+
+      function draw(dt) {
+        ctx.clearRect(0, 0, W, H);
+        ctx.textBaseline = "top";
+
+        for (let li = 0; li < LAYERS.length; li++) {
+          const layer = LAYERS[li];
+          const arr = columns[li];
+          const step = layer.font;
+          ctx.font = step + "px 'Courier New', monospace";
+          if (layer.blur > 0) {
+            ctx.shadowBlur = layer.blur;
+            ctx.shadowColor = "rgba(0, 255, 65, 0.45)";
+          } else {
+            ctx.shadowBlur = 0;
+          }
+
+          for (let i = 0; i < arr.length; i++) {
+            const c = arr[i];
+            c.y += c.speed * dt;
+
+            // 随机换字符：头部高频，拖尾偶发
+            if (Math.random() < 0.18) c.glyphs[0] = pick(CHARS);
+            if (Math.random() < 0.03) c.glyphs[(Math.random() * c.trailLen) | 0] = pick(CHARS);
+
+            for (let j = 0; j < c.trailLen; j++) {
+              const cy = c.y - j * step;
+              if (cy < -step || cy > H) continue;
+              if (j === 0) {
+                ctx.globalAlpha = Math.min(1, layer.baseAlpha + 0.15);
+                ctx.fillStyle = layer.headColor;
+              } else {
+                ctx.globalAlpha = layer.baseAlpha * (1 - j / c.trailLen);
+                ctx.fillStyle = layer.trailColor;
+              }
+              ctx.fillText(c.glyphs[j], c.x, cy);
+            }
+
+            // 整列坠出屏幕后回收，从顶部重新进入
+            if (c.y - c.trailLen * step > H) {
+              c.y = rand(-H, -step);
+              c.speed = rand(layer.minSpeed, layer.maxSpeed);
+              c.trailLen = (rand(layer.minTrail, layer.maxTrail)) | 0;
+              c.glyphs.length = 0;
+              for (let k = 0; k < c.trailLen; k++) c.glyphs[k] = pick(CHARS);
+            }
+          }
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      if (reduced) {
+        draw(0.016);
+      } else {
+        let last = performance.now();
+        function loop(now) {
+          const dt = Math.min((now - last) / 1000, 0.05);
+          last = now;
+          draw(dt);
+          requestAnimationFrame(loop);
+        }
+        requestAnimationFrame(loop);
+      }
+    })();
+  </script>
+</body>
+</html>
