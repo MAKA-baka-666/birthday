@@ -125,20 +125,20 @@
   #pwd-dialog { position: fixed; inset: 0; width: 100vw; height: 100dvh; max-width: none; max-height: 100dvh; margin: 0; padding: clamp(18px, 4vw, 54px); flex-direction: column; justify-content: center; align-items: center; gap: 12px; overflow-y: auto; clip-path: none; border: 0; background: transparent; box-shadow: none; }
   #pwd-dialog[open] { display: flex; }
   #pwd-dialog::before { display: none; }
-  #pwd-dialog .virus-header { position: relative; z-index: 2; width: min(780px, 100%); min-height: 47px; margin: 0 0 -8px; padding: 8px 18px; border: 0; border-left: 3px solid #ff5148; border-bottom: 1px dashed #ff766e99; clip-path: polygon(0 0, 98% 0, 100% 20%, 99% 100%, 2% 94%); background: linear-gradient(100deg, #270d10f5, #080909ed); box-shadow: 0 8px 30px #0008; transform: translateX(-10px) rotate(-.4deg); }
+  #pwd-dialog .virus-header { position: relative; z-index: 2; width: min(780px, 100%); min-height: 47px; margin: 0 0 -8px; padding: 8px 18px; border: 0; border-left: 3px solid #ff5148; border-bottom: 1px dashed #ff766e99; clip-path: polygon(0 0, 98% 0, 100% 20%, 99% 100%, 2% 94%); background: linear-gradient(100deg, #270d10f5, #080909ed); box-shadow: 0 8px 30px #0008; transform: translateX(-10px); }
   #pwd-dialog .virus-header .window-title, #pwd-dialog .virus-header .window-title .icon, #pwd-dialog .virus-header .window-state { color: #ff938b; }
   #pwd-dialog .virus-windows { position: relative; z-index: 2; width: min(780px, 100%); max-height: none; margin: 0; padding: 0; display: grid; grid-template-columns: .92fr 1.08fr; grid-template-areas: "core core" "clue input"; align-items: stretch; gap: 6px; overflow: visible; border: 0; clip-path: none; background: transparent; box-shadow: none; }
   #pwd-dialog .virus-window { min-width: 0; padding: 15px 17px; border: 0; border-left: 2px solid #ff6a61; border-bottom: 1px dashed #ff655d8a; background: linear-gradient(125deg, #1c0b0df2, #080909f0); box-shadow: 0 12px 34px #0009, 0 0 18px #ff463318; }
-  #pwd-dialog .virus-core { grid-area: core; display: grid; grid-template-columns: 56px 1fr; grid-template-rows: auto auto auto; align-items: center; column-gap: 15px; clip-path: polygon(0 0, 97% 0, 100% 12%, 99% 100%, 2% 96%); transform: translateX(8px) rotate(.35deg); }
+  #pwd-dialog .virus-core { grid-area: core; display: grid; grid-template-columns: 56px 1fr; grid-template-rows: auto auto auto; align-items: center; column-gap: 15px; clip-path: polygon(0 0, 97% 0, 100% 12%, 99% 100%, 2% 96%); transform: translateX(8px); }
   #pwd-dialog .virus-core .prompt { grid-column: 1 / -1; margin: 0 0 10px; color: #ffaaa3; }
   #pwd-dialog .virus-core .security-symbol { grid-column: 1; grid-row: 2 / 4; margin: 0; }
   #pwd-dialog .virus-core .dialog-title { grid-column: 2; margin: 0; font-size: 23px; }
   #pwd-dialog .virus-core .dialog-intro { grid-column: 2; margin: 2px 0 0; }
-  #pwd-dialog .virus-clue-window { grid-area: clue; align-self: center; margin-right: -8px; clip-path: polygon(2% 0, 100% 8%, 96% 100%, 0 93%); transform: translate(5px, -7px) rotate(-.65deg); }
+  #pwd-dialog .virus-clue-window { grid-area: clue; align-self: center; margin-right: -8px; clip-path: polygon(2% 0, 100% 8%, 96% 100%, 0 93%); transform: translate(5px, -7px); }
   #pwd-dialog .virus-clue-window .clue { margin: 0; padding: 5px 3px 8px 12px; border: 0; border-left: 2px solid #ff746b; background: transparent; clip-path: none; transform: none; }
   #pwd-dialog .virus-clue-window .clue-label { color: #ff998f; }
   #pwd-dialog .virus-clue-window .clue-text { color: #f0d0cc; }
-  #pwd-dialog .virus-input-window { grid-area: input; margin-left: -8px; clip-path: polygon(0 0, 98% 5%, 100% 100%, 4% 96%); transform: translate(-3px, 4px) rotate(.45deg); }
+  #pwd-dialog .virus-input-window { grid-area: input; margin-left: -8px; clip-path: polygon(0 0, 98% 5%, 100% 100%, 4% 96%); transform: translate(-3px, 4px); }
   #pwd-dialog .virus-input-window .pwd-label { color: #ffb2aa; }
   #pwd-dialog .virus-input-window .pwd-input { background: #090809; }
   #pwd-dialog .virus-input-window .submit { margin-top: 15px; background: linear-gradient(115deg, #ffaaa0, #ff655b); border-color: #ffb0a7; color: #250a0b; box-shadow: 0 0 20px #ff514822; }
@@ -201,7 +201,7 @@
   .gift-output { position: relative; overflow: hidden; padding: 18px 19px; margin: 23px 4px 23px 0; border: 0; border-left: 2px solid #6bffa3a6; border-bottom: 1px dashed #6bffa366; clip-path: polygon(0 0, 98% 6%, 100% 100%, 3% 94%); background: linear-gradient(120deg, #6bffa311, #6bffa302); }
   .gift-output::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, #6bffa310, transparent); pointer-events: none; }
   #gift-dialog[open] .gift-output::after { animation: output-scan .9s .25s ease both; }
-  .gift-bottom { display: flex; align-items: center; gap: 8px; color: #9ad6ad; font-size: 10px; margin: 0 0 24px; transform: translateX(-7px) rotate(-.5deg); }
+  .gift-bottom { display: flex; align-items: center; gap: 8px; color: #9ad6ad; font-size: 10px; margin: 0 0 24px; transform: translateX(-7px); }
   .gift-button { width: 100%; }
   .error-shake { animation: error-shake .3s ease !important; }
   /* 临时顶层窗口承载画面副本，撕开的缺口里直接显露真正的密码终端。 */
@@ -235,8 +235,8 @@
   .recovery-window b { font-size: 11px; font-weight: 500; }
   .recovery-alert, .recovery-done { display: inline-block; margin-right: 9px; color: #ff8178; font-size: 9px; letter-spacing: .7px; }
   .recovery-done { display: none; color: #8bffab; }
-  .recover-two { transform: translateX(12px) rotate(.5deg); }
-  .recover-three { transform: translateX(-8px) rotate(-.4deg); }
+  .recover-two { transform: translateX(12px); }
+  .recover-three { transform: translateX(-8px); }
   #gift-dialog.recovery-active .recovery-window { animation: infection-recovery 1.75s cubic-bezier(.2,.7,.2,1) both; }
   #gift-dialog.recovery-active .recover-two { animation-delay: .35s; }
   #gift-dialog.recovery-active .recover-three { animation-delay: .7s; }
@@ -289,14 +289,14 @@
     .recovery-window { padding: 7px 9px; font-size: 9px; }
     .recovery-window b { font-size: 10px; }
     #pwd-dialog { padding: 12px; justify-content: center; gap: 5px; }
-    #pwd-dialog .virus-header { margin-bottom: -5px; transform: translateX(-5px) rotate(-.3deg); }
+    #pwd-dialog .virus-header { margin-bottom: -5px; transform: translateX(-5px); }
     #pwd-dialog .virus-windows { grid-template-columns: 1fr; grid-template-areas: "core" "clue" "input"; gap: 5px; }
     #pwd-dialog .virus-window { padding: 12px 14px; }
     #pwd-dialog .virus-core { grid-template-columns: 44px 1fr; column-gap: 11px; }
     #pwd-dialog .virus-core .security-symbol { width: 39px; height: 39px; }
     #pwd-dialog .virus-core .dialog-title { font-size: 20px; }
-    #pwd-dialog .virus-clue-window { margin-right: -4px; transform: translate(3px, -3px) rotate(-.35deg); }
-    #pwd-dialog .virus-input-window { margin-left: -4px; transform: translate(-2px, 2px) rotate(.25deg); }
+    #pwd-dialog .virus-clue-window { margin-right: -4px; transform: translate(3px, -3px); }
+    #pwd-dialog .virus-input-window { margin-left: -4px; transform: translate(-2px, 2px); }
     #pwd-dialog .virus-input-window .submit { min-height: 48px; }
     .virus-popup { width: min(230px, 66vw); padding: 8px 10px; }
     .popup-one { top: 5%; left: 1%; }
@@ -351,7 +351,6 @@
   /* Birthday terminal: asymmetrical, mobile-first layout with one deliberate startup sequence. */
   .greeting {
     clip-path: polygon(0 0, 97% 0, 100% 7%, 98.5% 100%, 3% 97%, 0 90%);
-    transform: rotate(-.55deg);
     border: 0;
     border-left: 2px solid #71ff9a99;
     border-bottom: 1px solid #6bffa342;
@@ -363,36 +362,36 @@
   .greeting::before { left: 5%; right: 0; top: 0; height: 2px; background: linear-gradient(90deg, #92ffb7, #6bffa355 55%, transparent); box-shadow: 0 0 14px #6bffa344; animation: terminal-scan 1.6s .45s ease-out both; }
   .greeting::after { inset: 7px -7px -6px 8px; border: 0; border-right: 1px solid #6bffa344; border-bottom: 1px dashed #6bffa344; border-radius: 0; }
   .panel-corner { display: none; }
-  .message-header { margin-inline: -46px; padding-inline: 38px 30px; background: #6bffa306; transform: translateX(8px) rotate(.35deg); }
+  .message-header { margin-inline: -46px; padding-inline: 38px 30px; background: #6bffa306; transform: translateX(8px); }
   .file-label { transform: translateX(-7px); }
   .recipient { justify-content: flex-start; padding-left: clamp(12px, 6vw, 64px); transform: translateX(-8px); }
   .recipient::before { display: none; }
   .scramble { text-align: left; padding-left: clamp(12px, 6vw, 64px); text-shadow: -3px 3px 0 #2cff6c35, 0 0 34px #5bff8a55; animation: title-materialize .8s .3s both; }
-  .text-preview { text-align: right; padding-right: clamp(10px, 8vw, 78px); transform: rotate(-1.5deg); }
-  .surprise-button { display: flex; width: min(300px, 100%); min-height: 56px; margin: 22px 5% 0 auto; transform: rotate(.8deg); clip-path: polygon(0 0, 100% 0, 96% 100%, 3% 92%); animation: button-materialize .55s 1s both; }
+  .text-preview { text-align: right; padding-right: clamp(10px, 8vw, 78px); }
+  .surprise-button { display: flex; width: min(300px, 100%); min-height: 56px; margin: 22px 5% 0 auto; clip-path: polygon(0 0, 100% 0, 96% 100%, 3% 92%); animation: button-materialize .55s 1s both; }
   .surprise-launch { visibility: hidden; opacity: 0; width: min(560px, 100%); margin: 18px 0 0 auto; padding: 11px 14px 11px 18px; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 8px 16px; border: 1px solid #ffd36e40; border-left: 2px solid #ffd36e; background: linear-gradient(105deg, #17160ff2, #0a100ce8 78%, #070c09e8); clip-path: polygon(0 0, 98% 0, 100% 13%, 99% 100%, 2% 96%); box-shadow: 0 9px 28px #0007, 0 0 24px #ffc8570d; }
   .intro-complete .surprise-launch { visibility: visible; animation: warning-arrive .65s cubic-bezier(.2,.8,.2,1) both; }
   .launch-warning { display: flex; align-items: center; gap: 9px; margin: 0; color: #d9d7c9; font-size: 10px; line-height: 1.6; letter-spacing: .2px; }
   .launch-warning span { display: grid; place-items: center; flex: none; width: 22px; height: 22px; color: #ffd36e; border: 1px solid #ffd36e70; font-size: 11px; font-weight: 700; }
   .surprise-launch .surprise-button { width: min(228px, 32vw); min-height: 48px; margin: 0; padding-inline: 16px; gap: 12px; font-size: 12px; }
-  .surprise-button:hover { transform: rotate(0) translateY(-2px); }
-  .bottom-bar { position: relative; padding: 12px 18px 12px 24px; border: 0; border-left: 1px dashed #6bffa377; border-bottom: 1px solid #6bffa344; background: linear-gradient(100deg, #07140ef2, #030806b8); clip-path: polygon(2% 0, 100% 7%, 97% 100%, 0 91%); transform: rotate(.55deg); }
+  .surprise-button:hover { transform: translateY(-2px); }
+  .bottom-bar { position: relative; padding: 12px 18px 12px 24px; border: 0; border-left: 1px dashed #6bffa377; border-bottom: 1px solid #6bffa344; background: linear-gradient(100deg, #07140ef2, #030806b8); clip-path: polygon(2% 0, 100% 7%, 97% 100%, 0 91%); }
   .page-note { transform: translateX(7px); }
-  .journey { transform: translateX(-7px) rotate(-.5deg); }
-  @keyframes terminal-boot { from { opacity: 0; transform: translateY(14px) rotate(-1.4deg); filter: blur(3px); } to { opacity: 1; transform: rotate(-.55deg); filter: none; } }
+  .journey { transform: translateX(-7px); }
+  @keyframes terminal-boot { from { opacity: 0; transform: translateY(14px); filter: blur(3px); } to { opacity: 1; transform: none; filter: none; } }
   @keyframes terminal-scan { 0% { transform: translateY(-20px); opacity: 0; } 18% { opacity: .9; } 100% { transform: translateY(100px); opacity: 0; } }
   @keyframes title-materialize { 0% { opacity: 0; filter: blur(8px); letter-spacing: .35em; } 65% { opacity: 1; filter: blur(0); } 100% { letter-spacing: .16em; } }
-  @keyframes button-materialize { from { opacity: 0; transform: translateY(9px) rotate(2deg); } to { opacity: 1; transform: rotate(.8deg); } }
+  @keyframes button-materialize { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
   @keyframes warning-arrive { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
   @media (max-width: 680px) {
-    .greeting { padding: 0 23px 22px; transform: rotate(-.8deg); clip-path: polygon(0 0, 96% 0, 100% 7%, 97% 100%, 5% 96%, 0 88%); }
+    .greeting { padding: 0 23px 22px; clip-path: polygon(0 0, 96% 0, 100% 7%, 97% 100%, 5% 96%, 0 88%); }
     .message-header { margin-inline: -23px; padding: 14px 20px 14px 28px; }
     .recipient { margin: 25px 0 15px; padding-left: 10px; }
     .scramble { padding-left: 8px; font-size: clamp(39px, 10.2vw, 65px); letter-spacing: .1em; }
     .text-preview { padding-right: 8px; }
     .surprise-launch { width: 100%; margin-top: 16px; padding: 10px 11px 11px; grid-template-columns: 1fr; gap: 9px; clip-path: polygon(0 0, 97% 0, 100% 9%, 98% 100%, 2% 96%); }
     .launch-warning { font-size: 9px; }
-    .surprise-launch .surprise-button { width: 100%; margin: 0; min-height: 54px; justify-content: center; transform: rotate(.25deg); }
+    .surprise-launch .surprise-button { width: 100%; margin: 0; min-height: 54px; justify-content: center; }
     .bottom-bar { align-items: stretch; width: calc(100% - 8px); margin: 0 0 4px 8px; min-height: 81px; padding: 12px 14px 12px 20px; gap: 8px; }
     .journey { gap: 18px; }
   }
