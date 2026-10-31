@@ -358,9 +358,11 @@
     .journey { gap: 18px; }
   }
   /* 午夜花园：独立整屏场景，花开时揭晓内容。 */
-  body.gift-open > :is(#matrix-bg, .shade, .ambient, .scanlines) { visibility: hidden; }
+  body.gift-open:not(.garden-transitioning) > :is(#matrix-bg, .shade, .ambient, .scanlines) { visibility: hidden; }
+  body.garden-transitioning > :is(#matrix-bg, .shade, .ambient, .scanlines) { animation: garden-code-fade 1.25s ease-out both; }
   #gift-dialog { position: fixed; inset: 0; width: 100%; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; clip-path: none; background: #081321; color: #f5ebdd; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; box-shadow: none; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-color: #465d53 #081321; isolation: isolate; }
   #gift-dialog[open] { animation: none; }
+  #gift-dialog[data-garden-state="entering"] { background: transparent; }
   #gift-dialog::before { display: none; }
   #gift-dialog:focus { outline: none; }
   .garden-sky { position: fixed; z-index: -1; inset: 0; overflow: hidden; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, #1c3747 0, #112533 35%, #081321 76%); }
@@ -376,8 +378,8 @@
   .vine-leaf { fill: #173d36; stroke: #789174; stroke-width: .7; }
   .vine-sprig { transform-box: fill-box; transform-origin: 50% 100%; animation: garden-sway 8s ease-in-out infinite alternate; }
   .vine-sprig:nth-child(even) { animation-delay: -4s; animation-duration: 10s; }
-  #gift-dialog.garden-growing .vine-line { animation: vine-grow 2.2s .2s ease-out both; }
-  #gift-dialog.garden-growing .vine-leaf { animation: leaf-arrive 1.5s .5s ease-out both; }
+  #gift-dialog.garden-growing .vine-line { animation: vine-grow 2.2s .7s ease-out both; }
+  #gift-dialog.garden-growing .vine-leaf { animation: leaf-arrive 1.5s 1s ease-out both; }
   .garden-fireflies { position: absolute; inset: 0; }
   .garden-firefly { position: absolute; left: var(--x); top: var(--y); width: var(--size, 3px); height: var(--size, 3px); border-radius: 50%; background: #f3ce83; box-shadow: 0 0 9px 2px #f3ce8330; animation: firefly-drift var(--duration, 7s) var(--delay, 0s) ease-in-out infinite alternate; }
   .garden-content { position: relative; z-index: 1; width: min(560px, 100%); min-height: 100dvh; margin: 0 auto; padding: max(66px, env(safe-area-inset-top)) 24px max(30px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; }
@@ -405,12 +407,14 @@
   .garden-tag-label { margin: 0 0 5px; color: #657166; font-size: 11px; letter-spacing: 3px; }
   .garden-location { margin: 0; font-family: "Songti SC", "SimSun", serif; font-size: clamp(23px, 6vw, 28px); letter-spacing: 3px; line-height: 1.5; }
   .garden-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; clip-path: inset(50%); overflow: hidden; white-space: nowrap; }
-  .garden-entry-veil { position: fixed; z-index: 2; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, #451a27, #150f1b 70%); animation: garden-nightfall 1s ease-in both; }
-  .garden-echoes { position: fixed; z-index: 3; inset: 0; pointer-events: none; }
-  .garden-warning-echo { position: absolute; padding: 10px 13px; border-left: 3px solid #ff665d; border-bottom: 1px solid #ff665d88; clip-path: polygon(0 0, 96% 0, 100% 12%, 98% 100%, 4% 96%); background: #250d13; color: #ffb2a7; font: 10px/1.7 var(--mono); animation: warning-to-light .95s ease-in both; }
-  .garden-warning-echo b { display: block; font-size: 12px; font-weight: 400; }
-  #gift-dialog[data-garden-state="entering"] .garden-content { opacity: 0; }
-  #gift-dialog[data-garden-state="ready"] .garden-content { animation: garden-arrive .6s ease-out both; }
+  .garden-entry-veil { position: fixed; z-index: 2; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% var(--entry-y, 48%), #f3ce831c, transparent 48%); animation: garden-threshold var(--entry-duration, 1.7s) ease-in-out both; }
+  .garden-entry-veil::before, .garden-entry-veil::after { content: ""; position: absolute; left: 50%; top: var(--entry-y, 48%); width: min(68vw, 420px); aspect-ratio: 1; border: 1px solid #f3ce8377; border-radius: 50%; opacity: 0; animation: garden-light-ring 1.3s .3s cubic-bezier(.15,.65,.25,1) both; }
+  .garden-entry-veil::after { width: min(50vw, 310px); animation-delay: .44s; border-color: #f5ebdd38; }
+  #gift-dialog.garden-arriving .garden-sky { animation: garden-sky-in var(--entry-duration, 1.7s) ease-in-out both; }
+  #gift-dialog.garden-arriving .garden-bud { animation: garden-bud-arrive .85s .7s cubic-bezier(.16,.7,.25,1) both; }
+  #gift-dialog.garden-arriving .garden-moon { animation: garden-moon-arrive .9s .7s ease-out both; }
+  #gift-dialog.garden-arriving .garden-firefly { animation: garden-seed-flight var(--entry-duration, 1.7s) cubic-bezier(.16,.6,.25,1) both; }
+  #gift-dialog[data-garden-state="ready"] .garden-hint { animation: garden-arrive .55s ease-out both; }
   #gift-dialog[data-garden-state="blooming"] .garden-bud { animation: bud-release .45s ease-out both; }
   #gift-dialog[data-garden-state="blooming"] .bouquet-stems { stroke-dasharray: 360; animation: stems-grow .8s ease-out both; }
   #gift-dialog[data-garden-state="blooming"] .bouquet-foliage { animation: leaf-arrive .8s .15s ease-out both; }
@@ -418,7 +422,13 @@
   #gift-dialog[data-garden-state="revealed"] :is(.garden-wish, .garden-reveal) { animation: garden-arrive .6s ease-out both; }
   #gift-dialog[data-garden-state="revealed"] .garden-reveal { animation-delay: .12s; }
   #gift-dialog.garden-paused *, #gift-dialog.garden-paused *::before, #gift-dialog.garden-paused *::after { animation-play-state: paused !important; }
-  @keyframes garden-nightfall { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes garden-code-fade { to { opacity: 0; } }
+  @keyframes garden-sky-in { 0%, 8% { opacity: 0; } 55% { opacity: .85; } 100% { opacity: 1; } }
+  @keyframes garden-threshold { 0% { opacity: 0; } 42% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes garden-light-ring { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.12); } 25% { opacity: .6; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6); } }
+  @keyframes garden-bud-arrive { from { opacity: 0; transform: translateY(14px) scale(.88); } to { opacity: 1; transform: none; } }
+  @keyframes garden-moon-arrive { from { opacity: 0; transform: translateY(6px); } to { opacity: .65; transform: none; } }
+  @keyframes garden-seed-flight { 0%, 9% { opacity: 0; transform: translate(var(--seed-x, 0px), var(--seed-y, 0px)) scale(.5); } 28% { opacity: 1; } 65% { opacity: .75; } 100% { opacity: .25; transform: translate(0, 9px) scale(1); } }
   @keyframes garden-arrive { from { opacity: 0; } to { opacity: 1; } }
   @keyframes vine-grow { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
   @keyframes leaf-arrive { from { opacity: 0; } to { opacity: 1; } }
@@ -428,7 +438,6 @@
   @keyframes flower-unfold { from { opacity: 0; transform: rotate(-24deg) scale(.06); } to { opacity: 1; transform: rotate(0) scale(1); } }
   @keyframes garden-sway { from { transform: rotate(-1.3deg); } to { transform: rotate(1.3deg); } }
   @keyframes firefly-drift { 0% { opacity: .15; transform: translate(0, 9px); } 60% { opacity: .8; } 100% { opacity: .25; transform: translate(var(--drift, 10px), -15px); } }
-  @keyframes warning-to-light { 0% { opacity: .9; } 55% { opacity: .65; border-color: #f3ce83; background: #f3ce8355; color: transparent; } 100% { opacity: 0; transform: translate(var(--fly-x), var(--fly-y)) rotate(var(--fly-turn)) scale(.015); border-color: #f3ce83; background: #f3ce83; color: transparent; } }
   @media (max-width: 680px) {
     .garden-content { padding-inline: 24px; gap: 10px; }
     .garden-wish-slot { min-height: 114px; }
@@ -568,7 +577,6 @@
     <p class="garden-status" id="garden-status" aria-live="polite"></p>
   </div>
   <div class="garden-entry-veil" id="garden-entry-veil" hidden></div>
-  <div class="garden-echoes" id="garden-echoes" aria-hidden="true"></div>
 </dialog>
 <noscript><p style="position:relative;padding:20px;text-align:center;color:#ecfff2">请开启浏览器的 JavaScript，解锁这份生日惊喜。</p></noscript>
 <script>
@@ -583,16 +591,32 @@
   let unlocked = false, actionTaken = false, transitioning = false;
   const gardenBud = $('garden-bud'), gardenBouquet = $('garden-bouquet');
   const gardenWish = $('garden-wish'), gardenReveal = $('garden-reveal');
-  const gardenHint = $('garden-hint'), gardenEchoes = $('garden-echoes');
+  const gardenHint = $('garden-hint');
   const gardenVeil = $('garden-entry-veil'), gardenStatus = $('garden-status');
   const gardenTimers = new Set();
+  const gardenExitEffects = new Set();
+  const GARDEN_ENTRY_MS = 1700;
+  giftDialog.style.setProperty('--entry-duration', GARDEN_ENTRY_MS + 'ms');
   let gardenState = 'closed', gardenVisited = false, gardenRevealed = false;
+  let gardenOwnsPassword = false;
 
   function clearGardenTasks() {
     gardenTimers.forEach((timer) => clearTimeout(timer));
     gardenTimers.clear();
-    gardenEchoes.replaceChildren();
+    // 先关闭作为过场来源的底层窗口，再取消它的动画，避免恢复原样时闪回。
+    if (gardenOwnsPassword) {
+      gardenOwnsPassword = false;
+      if (passwordDialog.open) passwordDialog.close();
+    }
+    gardenExitEffects.forEach((effect) => effect.cancel());
+    gardenExitEffects.clear();
+    document.body.classList.remove('garden-transitioning');
+    giftDialog.classList.remove('garden-arriving');
     gardenVeil.hidden = true;
+  }
+  function closeGiftDialog() {
+    clearGardenTasks();
+    if (giftDialog.open) giftDialog.close();
   }
   function scheduleGarden(callback, delay) {
     const timer = setTimeout(() => {
@@ -634,30 +658,32 @@
     setGardenState('blooming');
     scheduleGarden(revealGarden, 1600);
   }
-  function captureVirusWarnings() {
-    if (motion.matches) return [];
-    return Array.from(passwordDialog.querySelectorAll('.virus-popup')).map((popup) => {
-      const rect = popup.getBoundingClientRect();
-      return { x: rect.left, y: rect.top, width: rect.width,
-        label: popup.querySelector('.virus-bar')?.textContent || '[!] WARNING',
-        message: popup.querySelector('b')?.textContent || '' };
+  function dissolveVirusScene() {
+    const bud = gardenBud.getBoundingClientRect();
+    const destination = { x: bud.left + bud.width / 2, y: bud.top + bud.height * .42 };
+    giftDialog.style.setProperty('--entry-y', destination.y + 'px');
+    const panels = Array.from(passwordDialog.querySelectorAll('.virus-header, .virus-window, .virus-popup')).map((node) => ({
+      node, rect: node.getBoundingClientRect(), style: getComputedStyle(node)
+    })).filter(({ rect, style }) => rect.width && rect.height && rect.bottom > 0 && rect.top < innerHeight && style.visibility === 'visible' && Number(style.opacity) > .03);
+    // 十颗已有萤火承接窗口的位置，飞向花园边缘，不增加粒子或绘制循环。
+    const flies = Array.from(giftDialog.querySelectorAll('.garden-firefly')).map((node) => ({ node, rect: node.getBoundingClientRect() }));
+    flies.forEach(({ node, rect }, i) => {
+      const source = panels.length ? panels[i % panels.length].rect : null;
+      const x = source ? source.left + source.width / 2 : destination.x;
+      const y = source ? source.top + source.height / 2 : destination.y;
+      node.style.setProperty('--seed-x', (x - rect.left) + 'px');
+      node.style.setProperty('--seed-y', (y - rect.top) + 'px');
     });
-  }
-  function scatterWarnings(warnings) {
-    warnings.forEach((warning, i) => {
-      const echo = document.createElement('div');
-      echo.className = 'garden-warning-echo';
-      const title = document.createElement('span'), message = document.createElement('b');
-      title.textContent = warning.label; message.textContent = warning.message;
-      echo.append(title, message);
-      const width = Math.min(warning.width, innerWidth - 24);
-      echo.style.width = width + 'px';
-      echo.style.left = Math.max(12, Math.min(warning.x, innerWidth - width - 12)) + 'px';
-      echo.style.top = Math.max(12, Math.min(warning.y, innerHeight - 90)) + 'px';
-      echo.style.setProperty('--fly-x', (i % 2 ? -70 : 70) + 'px');
-      echo.style.setProperty('--fly-y', (-60 - i * 14) + 'px');
-      echo.style.setProperty('--fly-turn', (i % 2 ? -16 : 16) + 'deg');
-      gardenEchoes.append(echo);
+    panels.forEach(({ node, rect, style }, i) => {
+      const base = style.transform === 'none' ? '' : style.transform;
+      const dx = destination.x - rect.left - rect.width / 2;
+      const dy = destination.y - rect.top - rect.height / 2;
+      const effect = node.animate([
+        { transform: style.transform, translate: style.translate, scale: style.scale, opacity: style.opacity },
+        { offset: .22, opacity: style.opacity },
+        { transform: `translate(${dx}px, ${dy}px) ${base} rotate(${i % 2 ? -8 : 8}deg) scale(.06)`, translate: 'none', scale: '1', opacity: 0 }
+      ], { duration: 820, delay: i * 24, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'both' });
+      gardenExitEffects.add(effect);
     });
   }
   function resetError() {
@@ -680,7 +706,7 @@
     if (focusInput) passwordDialog.classList.add('virus-active');
     if (focusInput) focusPasswordInput();
   }
-  function openGiftDialog(warnings = []) {
+  function openGiftDialog(fromVirus = false) {
     if (giftDialog.open) return;
     actionTaken = true;
     clearGardenTasks();
@@ -693,7 +719,11 @@
     gardenStatus.textContent = '';
     const entering = !gardenVisited && !motion.matches && !gardenRevealed;
     gardenVisited = true;
+    gardenOwnsPassword = entering && fromVirus && passwordDialog.open;
+    if (!gardenOwnsPassword && passwordDialog.open) passwordDialog.close();
     giftDialog.classList.toggle('garden-growing', entering);
+    giftDialog.classList.toggle('garden-arriving', entering);
+    document.body.classList.toggle('garden-transitioning', entering);
     setGardenState(entering ? 'entering' : 'ready');
     document.body.classList.add('gift-open');
     document.querySelector('.app').hidden = true;
@@ -703,8 +733,8 @@
     if (gardenRevealed) { revealGarden(); return; }
     if (!entering) { readyGarden(); return; }
     gardenVeil.hidden = false;
-    scatterWarnings(warnings);
-    scheduleGarden(readyGarden, 1000);
+    dissolveVirusScene();
+    scheduleGarden(readyGarden, GARDEN_ENTRY_MS);
   }
 
   function scramble(el, text, glyphs, charDelay) {
@@ -900,7 +930,14 @@
     if (event.animationName === 'vine-grow') giftDialog.classList.remove('garden-growing');
   });
   document.querySelectorAll('[data-close]').forEach((button) => {
-    button.addEventListener('click', () => $(button.dataset.close).close());
+    button.addEventListener('click', () => {
+      if (button.dataset.close === 'gift-dialog') closeGiftDialog();
+      else $(button.dataset.close).close();
+    });
+  });
+  giftDialog.addEventListener('cancel', (event) => {
+    event.preventDefault();
+    closeGiftDialog();
   });
   [passwordDialog, giftDialog].forEach((dialog) => {
     dialog.addEventListener('close', () => {
@@ -933,17 +970,19 @@
     });
     dialog.addEventListener('click', (event) => {
       const r = dialog.getBoundingClientRect();
-      if (event.target === dialog && (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom)) dialog.close();
+      if (event.target === dialog && (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom)) {
+        if (dialog === giftDialog) closeGiftDialog();
+        else dialog.close();
+      }
     });
   });
   input.addEventListener('input', resetError);
   $('pwd-form').addEventListener('submit', (event) => {
     event.preventDefault();
     if (input.value.trim() === PASSWORD) {
-      const warnings = captureVirusWarnings();
-      unlocked = true; resetError(); input.blur(); passwordDialog.close();
+      unlocked = true; resetError(); input.blur();
       $('open-label').textContent = '返回午夜花园';
-      openGiftDialog(warnings);
+      openGiftDialog(true);
     } else {
       input.value = ''; error.hidden = false; input.setAttribute('aria-invalid', 'true');
       passwordDialog.classList.remove('error-shake'); void passwordDialog.offsetWidth;
