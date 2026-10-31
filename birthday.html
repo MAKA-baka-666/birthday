@@ -404,8 +404,6 @@
   .garden-tag::before { content: ""; display: block; width: 4px; height: 4px; margin: 0 auto 9px; border-radius: 50%; background: #081321; box-shadow: 0 0 0 3px #ab99803d; }
   .garden-tag-label { margin: 0 0 5px; color: #657166; font-size: 11px; letter-spacing: 3px; }
   .garden-location { margin: 0; font-family: "Songti SC", "SimSun", serif; font-size: clamp(23px, 6vw, 28px); letter-spacing: 3px; line-height: 1.5; }
-  .garden-accept { min-height: 48px; padding: 10px 20px; border: 0; border-bottom: 1px solid #f3ce8366; background: transparent; color: #f3ce83; font-size: 13px; letter-spacing: 1px; }
-  .garden-accept:hover { color: #fff0c8; border-color: #f3ce83; }
   .garden-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; clip-path: inset(50%); overflow: hidden; white-space: nowrap; }
   .garden-entry-veil { position: fixed; z-index: 2; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, #451a27, #150f1b 70%); animation: garden-nightfall 1s ease-in both; }
   .garden-echoes { position: fixed; z-index: 3; inset: 0; pointer-events: none; }
@@ -565,7 +563,6 @@
       <p class="garden-hint" id="garden-hint" hidden>轻点花苞，让祝福盛开</p>
       <div class="garden-reveal" id="garden-reveal" hidden>
         <div class="garden-tag" id="gift-description"><p class="garden-tag-label">礼物位置</p><p class="garden-location">洗衣房最高处</p></div>
-        <button class="garden-accept" type="button" data-close="gift-dialog">收下祝福，去找礼物</button>
       </div>
     </div>
     <p class="garden-status" id="garden-status" aria-live="polite"></p>
