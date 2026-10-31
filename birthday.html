@@ -384,7 +384,7 @@
   @keyframes button-materialize { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
   @keyframes warning-arrive { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
   @media (max-width: 680px) {
-    .greeting { padding: 0 23px 22px; clip-path: polygon(0 0, 96% 0, 100% 7%, 97% 100%, 5% 96%, 0 88%); }
+    .greeting { padding: 0 23px 22px; backdrop-filter: blur(5px); clip-path: polygon(0 0, 96% 0, 100% 7%, 97% 100%, 5% 96%, 0 88%); }
     .message-header { margin-inline: -23px; padding: 14px 20px 14px 28px; }
     .recipient { margin: 25px 0 15px; padding-left: 10px; }
     .scramble { padding-left: 8px; font-size: clamp(39px, 10.2vw, 65px); letter-spacing: .1em; }
@@ -765,6 +765,7 @@
   // 延续原版三层景深的绿色代码雨，限制帧率并暂停后台绘制。
   const canvas = $('matrix-bg'), ctx = canvas.getContext('2d');
   let bgFrame = 0, last = 0, w = 0, h = 0, columns = [];
+  const compactScreen = matchMedia('(max-width: 680px)');
   const CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン+-*/=<>[]{}';
   const layers = [
     { font: 21, gap: 29, minSpeed: 90, maxSpeed: 165, alpha: .78, trail: 17, head: '#dcffe8' },
@@ -773,15 +774,17 @@
   ];
   const random = (min, max) => min + Math.random() * (max - min);
   const pick = () => CHARS[Math.floor(Math.random() * CHARS.length)];
+  const mobileScale = () => compactScreen.matches ? 1.35 : 1;
   function resizeRain() {
     if (!ctx) return;
     w = innerWidth; h = innerHeight;
-    const dpr = Math.min(devicePixelRatio || 1, 2);
+    const dpr = Math.min(devicePixelRatio || 1, compactScreen.matches ? 1.35 : 2);
     canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    columns = layers.map((layer) => Array.from({ length: Math.ceil(w / layer.gap) }, (_, i) => ({
-      x: i * layer.gap + random(-3, 3), y: random(-h * .15, h * 1.2),
-      speed: random(layer.minSpeed, layer.maxSpeed), trail: Math.floor(random(layer.trail * .65, layer.trail + 1)), glyphs: Array.from({ length: layer.trail }, pick)
+    const scale = mobileScale();
+    columns = layers.map((layer) => Array.from({ length: Math.ceil(w / (layer.gap * scale)) }, (_, i) => ({
+      x: i * layer.gap * scale + random(-3, 3), y: random(-h * .15, h * 1.2),
+      speed: random(layer.minSpeed, layer.maxSpeed), trail: Math.floor(random(layer.trail * (compactScreen.matches ? .42 : .65), layer.trail + 1)), glyphs: Array.from({ length: layer.trail }, pick)
     })));
     drawRain(0);
   }
@@ -800,7 +803,7 @@
           const y = col.y - j * layer.font;
           if (y < -layer.font || y > h) continue;
           ctx.globalAlpha = layer.alpha * (1 - j / col.trail);
-          ctx.shadowBlur = j === 0 && li === 0 ? 4 : 0;
+          ctx.shadowBlur = !compactScreen.matches && j === 0 && li === 0 ? 4 : 0;
           ctx.fillStyle = j === 0 ? layer.head : '#00ff41';
           ctx.fillText(col.glyphs[j], col.x, y);
         }
@@ -810,7 +813,8 @@
     ctx.globalAlpha = 1; ctx.shadowBlur = 0;
   }
   function rainLoop(now) {
-    if (now - last >= 1000 / 30) { drawRain(last ? Math.min((now - last) / 1000, .08) : 0); last = now; }
+    const frameInterval = 1000 / (compactScreen.matches ? 20 : 30);
+    if (now - last >= frameInterval) { drawRain(last ? Math.min((now - last) / 1000, .08) : 0); last = now; }
     bgFrame = requestAnimationFrame(rainLoop);
   }
   function syncRain() {
