@@ -192,20 +192,33 @@
   .submit:active { background: #42d97d; }
   .dialog-footnote { margin: 15px 0 0; color: #8aa696; font-size: 10px; line-height: 1.8; }
   .error-shake { animation: error-shake .3s ease !important; }
-  /* 临时顶层窗口承载画面副本，撕开的缺口里直接显露真正的密码终端。 */
+  /* 仅拆开终端前景；原代码雨继续绘制，裂口后方是真实密码窗口。 */
   #pwd-dialog.through-tear { animation: none; }
-  .screen-tear { position: fixed; inset: 0; width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; overflow: hidden; isolation: isolate; }
+  #pwd-dialog.through-tear.virus-active .virus-header { animation-duration: .4s; animation-delay: 0s; }
+  #pwd-dialog.through-tear.virus-active .virus-core { animation-duration: .42s; animation-delay: .08s; }
+  #pwd-dialog.through-tear.virus-active .virus-clue-window { animation-duration: .42s; animation-delay: .2s; }
+  #pwd-dialog.through-tear.virus-active .virus-input-window { animation-duration: .45s; animation-delay: .34s; }
+  #pwd-dialog.through-tear.virus-active .virus-popup { animation-duration: .5s; animation-delay: var(--tear-delay, 0s); }
+  #pwd-dialog.through-tear .popup-two { --tear-delay: .06s; }
+  #pwd-dialog.through-tear .popup-five { --tear-delay: .12s; }
+  #pwd-dialog.through-tear .popup-three { --tear-delay: .18s; }
+  #pwd-dialog.through-tear .popup-four { --tear-delay: .24s; }
+  #pwd-dialog.through-tear .popup-six { --tear-delay: .3s; }
+  #pwd-dialog.through-tear.virus-active :is(.security-symbol, .clue) { animation: none; }
+  #pwd-dialog.virus-settled :is(.virus-header, .virus-window, .virus-popup, .security-symbol, .clue) { animation: none !important; opacity: 1; translate: none; scale: 1; }
+  #pwd-dialog.virus-settled .virus-popup { transform: none; }
+  .screen-tear { position: fixed; inset: 0; width: 100%; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; border-radius: 0; clip-path: none; background: transparent; box-shadow: none; overflow: hidden; isolation: isolate; }
   .screen-tear[open] { animation: none; }
+  .screen-tear::before { display: none; }
+  .screen-tear:focus { outline: none; }
   .screen-tear::backdrop { background: transparent; backdrop-filter: none; }
-  .tear-half, .tear-scene { position: absolute; inset: 0; overflow: hidden; }
-  .tear-half { will-change: transform; }
-  .tear-scene { z-index: 0; background: var(--bg); pointer-events: none; }
-  .tear-scene *, .tear-scene *::before, .tear-scene *::after { animation: none !important; transition: none !important; caret-color: transparent; }
-  .tear-scene .shade, .tear-scene .ambient, .tear-scene .scanlines, .tear-matrix { position: absolute; inset: 0; }
-  .tear-matrix { display: block; width: 100%; height: 100%; opacity: .8; }
+  .tear-half { position: absolute; inset: 0; overflow: hidden; will-change: transform; pointer-events: none; }
+  .tear-card, .tear-card *, .tear-card::before, .tear-card::after, .tear-card *::before, .tear-card *::after { animation: none !important; transition: none !important; caret-color: transparent; }
+  .screen-tear .tear-card { visibility: visible !important; backdrop-filter: none; }
+  .screen-tear .tear-card::before { opacity: var(--tear-top-opacity, 0); }
   .tear-edge, .tear-seam { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-  .tear-edge { z-index: 1; stroke: #c1ffd8; stroke-width: 1.5; filter: drop-shadow(0 0 5px #6bffa3) drop-shadow(0 0 15px #26ef73); }
-  .tear-seam { z-index: 2; stroke: #d1ffe2; stroke-width: 1.6; filter: drop-shadow(0 0 6px #6bffa3) drop-shadow(0 0 18px #00ff65); }
+  .tear-edge { z-index: 1; stroke: #ff665d; stroke-width: 1.2; filter: drop-shadow(0 0 3px #ff665d88); }
+  .tear-seam { z-index: 2; stroke: #ff665d; stroke-width: 1.6; filter: drop-shadow(0 0 4px #ff665d99); }
   @keyframes terminal-open { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
   @keyframes lock-in { from { opacity: .45; } to { opacity: 1; } }
   @keyframes error-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
@@ -484,7 +497,7 @@
   </footer>
 </div>
 
-<dialog id="pwd-dialog" aria-labelledby="pwd-title" aria-describedby="pwd-intro">
+<dialog id="pwd-dialog" aria-labelledby="pwd-title" aria-describedby="pwd-intro" autofocus>
   <div class="virus-burst" aria-hidden="true">
     <div class="virus-popup popup-one"><span class="virus-bar">[!] SYSTEM WARNING</span><b>检测到异常进程</b><small>gift.exe 正在尝试绕过加密</small></div>
     <div class="virus-popup popup-two"><span class="virus-bar">[!] MEMORY LEAK</span><b>发现隐藏数据</b><small>缓存线索：让人放松的物品</small></div>
@@ -700,6 +713,7 @@
   function openPasswordDialog(focusInput = true) {
     actionTaken = true; finishScrambles(); resetError();
     input.value = '';
+    if (!passwordDialog.open) passwordDialog.classList.remove('virus-active', 'virus-settled');
     document.body.classList.add('password-open');
     document.querySelector('.app').hidden = true;
     if (!passwordDialog.open) passwordDialog.showModal();
@@ -780,127 +794,169 @@
     });
   }
 
-  // 将当前画面复制成两半，沿同一条锯齿裂缝展开；不需要外部截图库。
+  function settleVirusStage() {
+    if (passwordDialog.open && !giftDialog.open) {
+      passwordDialog.classList.add('virus-active', 'virus-settled');
+    }
+  }
+
+  // 两片终端前景沿红色裂缝分开；不复制背景 Canvas 或整页 DOM。
   async function tearOpenPassword() {
-    if (motion.matches || typeof openButton.animate !== 'function') {
-      openPasswordDialog();
-      return;
+    const effects = [], timers = new Set(), removeListeners = [];
+    let cover = null, passwordOpened = false;
+    function listen(target, type, listener) {
+      target.addEventListener(type, listener);
+      removeListeners.push(() => target.removeEventListener(type, listener));
     }
-    const width = innerWidth, height = innerHeight;
-    const app = document.querySelector('.app'), appRect = app.getBoundingClientRect();
-    const rain = $('matrix-bg');
-    const count = Math.ceil(width / 22);
-    const points = Array.from({ length: count + 1 }, (_, i) => [
-      width * i / count,
-      height / 2 + (i === 0 || i === count ? 0 : (i % 2 ? -1 : 1) * (3 + Math.random() * 7))
-    ]);
-    const pathFrom = (vertices) => vertices.map(([x, y], i) => (i ? 'L' : 'M') + x + ',' + y).join(' ');
-    const coordinates = (vertices) => vertices.map(([x, y]) => x + 'px ' + y + 'px').join(',');
-    const fullPath = pathFrom(points);
-    const svgNS = 'http://www.w3.org/2000/svg';
-    function makeSvg(className) {
-      const svg = document.createElementNS(svgNS, 'svg');
-      svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
-      svg.setAttribute('class', className);
-      svg.setAttribute('aria-hidden', 'true');
-      return svg;
-    }
-    function makePath(d) {
-      const path = document.createElementNS(svgNS, 'path');
-      path.setAttribute('d', d);
-      return path;
-    }
-    function snapshotScene() {
-      const scene = document.createElement('div');
-      scene.className = 'tear-scene';
-      const rainCopy = document.createElement('canvas');
-      rainCopy.className = 'tear-matrix';
-      rainCopy.width = rain.width; rainCopy.height = rain.height;
-      rainCopy.getContext('2d')?.drawImage(rain, 0, 0);
-      scene.appendChild(rainCopy);
-      ['.shade', '.ambient', '.scanlines'].forEach((selector) => scene.appendChild(document.querySelector(selector).cloneNode(true)));
-      const copy = app.cloneNode(true);
-      copy.querySelectorAll('[id]').forEach((el) => el.removeAttribute('id'));
-      copy.inert = true;
-      Object.assign(copy.style, {
-        position: 'absolute', left: appRect.left + 'px', top: appRect.top + 'px',
-        width: appRect.width + 'px', height: appRect.height + 'px', minHeight: '0',
-        visibility: 'hidden'
-      });
-      scene.appendChild(copy);
-      return scene;
-    }
-    const cover = document.createElement('dialog');
-    cover.className = 'screen-tear';
-    cover.setAttribute('aria-label', '正在展开生日惊喜');
-    cover.tabIndex = -1;
-    cover.addEventListener('cancel', (event) => event.preventDefault());
-    const halves = [0, 1].map((index) => {
-      const half = document.createElement('div');
-      half.className = 'tear-half';
-      half.setAttribute('aria-hidden', 'true'); half.inert = true;
-      half.style.clipPath = index === 0
-        ? 'polygon(0 0,' + width + 'px 0,' + coordinates([...points].reverse()) + ')'
-        : 'polygon(' + coordinates(points) + ',' + width + 'px ' + height + 'px,0 ' + height + 'px)';
-      half.appendChild(snapshotScene());
-      const edge = makeSvg('tear-edge');
-      edge.style.opacity = '0'; edge.appendChild(makePath(fullPath));
-      half.appendChild(edge); cover.appendChild(half);
-      return half;
-    });
-    const seam = makeSvg('tear-seam');
-    const center = Math.floor(points.length / 2);
-    [points.slice(0, center + 1).reverse(), points.slice(center)].forEach((vertices) => seam.appendChild(makePath(pathFrom(vertices))));
-    cover.appendChild(seam);
-    const effects = [];
-    let finishTransition;
     try {
-      // 密码窗口先放在底层，撕裂画面盖在它上方，缺口扩大时自然显露。
       passwordDialog.classList.add('through-tear');
+      if (motion.matches || document.hidden || typeof openButton.animate !== 'function') {
+        openPasswordDialog(false);
+        passwordOpened = true;
+        return;
+      }
+      const width = innerWidth, height = innerHeight;
+      const greeting = document.querySelector('.greeting');
+      const rect = greeting.getBoundingClientRect();
+      const seamY = Math.max(24, Math.min(height - 24, rect.top + rect.height * .52));
+      const count = Math.min(width <= 680 ? 18 : 36, Math.max(8, Math.ceil(width / 24)));
+      const points = Array.from({ length: count + 1 }, (_, i) => [
+        width * i / count,
+        seamY + (i === 0 || i === count ? 0 : (i % 2 ? -1 : 1) * (3 + Math.random() * 3))
+      ]);
+      const pathFrom = (vertices) => vertices.map(([x, y], i) => (i ? 'L' : 'M') + x + ',' + y).join(' ');
+      const coordinates = (vertices) => vertices.map(([x, y]) => x + 'px ' + y + 'px').join(',');
+      const svgNS = 'http://www.w3.org/2000/svg';
+      function makeSvg(className, vertices) {
+        const svg = document.createElementNS(svgNS, 'svg');
+        svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+        svg.setAttribute('class', className);
+        svg.setAttribute('aria-hidden', 'true');
+        const path = document.createElementNS(svgNS, 'path');
+        path.setAttribute('d', pathFrom(vertices));
+        svg.appendChild(path);
+        return svg;
+      }
+      function copyForeground() {
+        const copy = greeting.cloneNode(true);
+        copy.classList.add('tear-card');
+        copy.removeAttribute('hidden');
+        copy.removeAttribute('id');
+        copy.removeAttribute('aria-labelledby');
+        copy.querySelectorAll('[id], [aria-labelledby], [aria-describedby], [autofocus]').forEach((node) => {
+          ['id', 'aria-labelledby', 'aria-describedby', 'autofocus'].forEach((name) => node.removeAttribute(name));
+        });
+        copy.querySelectorAll('[aria-live], [role="status"]').forEach((node) => {
+          node.removeAttribute('aria-live'); node.removeAttribute('role');
+        });
+        copy.inert = true;
+        copy.setAttribute('aria-hidden', 'true');
+        Object.assign(copy.style, {
+          position: 'absolute', left: rect.left + 'px', top: rect.top + 'px',
+          width: rect.width + 'px', height: rect.height + 'px', minHeight: '0',
+          margin: '0', visibility: 'visible', transform: 'none', opacity: getComputedStyle(greeting).opacity
+        });
+        copy.style.setProperty('--tear-top-opacity', getComputedStyle(greeting, '::before').opacity);
+        const originalTitle = greeting.querySelector('.scramble');
+        const copiedTitle = copy.querySelector('.scramble');
+        if (originalTitle && copiedTitle) copiedTitle.style.letterSpacing = getComputedStyle(originalTitle).letterSpacing;
+        const originalLaunch = greeting.querySelector('.surprise-launch');
+        const copiedLaunch = copy.querySelector('.surprise-launch');
+        if (originalLaunch && copiedLaunch) {
+          copiedLaunch.style.opacity = getComputedStyle(originalLaunch).opacity;
+          copiedLaunch.style.visibility = getComputedStyle(originalLaunch).visibility;
+        }
+        return copy;
+      }
+      cover = document.createElement('dialog');
+      cover.className = 'screen-tear';
+      cover.setAttribute('aria-label', '正在开启惊喜');
+      cover.tabIndex = -1;
+      const halves = [0, 1].map((index) => {
+        const half = document.createElement('div');
+        half.className = 'tear-half';
+        half.setAttribute('aria-hidden', 'true'); half.inert = true;
+        half.style.clipPath = index === 0
+          ? `polygon(0 0,${width}px 0,${coordinates([...points].reverse())})`
+          : `polygon(${coordinates(points)},${width}px ${height}px,0 ${height}px)`;
+        half.appendChild(copyForeground());
+        const edge = makeSvg('tear-edge', points);
+        edge.style.opacity = '0';
+        half.appendChild(edge); cover.appendChild(half);
+        return half;
+      });
+      const seam = makeSvg('tear-seam', []);
+      seam.replaceChildren();
+      const center = Math.floor(points.length / 2);
+      [points.slice(0, center + 1).reverse(), points.slice(center)].forEach((vertices) => {
+        seam.appendChild(makeSvg('tear-seam', vertices).firstElementChild);
+      });
+      cover.appendChild(seam);
+      let finishEarly;
+      const interrupted = new Promise((resolve) => { finishEarly = resolve; });
+      listen(cover, 'cancel', (event) => { event.preventDefault(); finishEarly(); });
+      listen(window, 'resize', finishEarly);
+      listen(document, 'visibilitychange', () => { if (document.hidden) finishEarly(); });
+      listen(motion, 'change', () => { if (motion.matches) finishEarly(); });
+      listen(passwordDialog, 'close', finishEarly);
+
+      // 副本已捕获后才隐藏首页；真实病毒窗口在遮罩后从裂口展开。
       openPasswordDialog(false);
-      const reveal = passwordDialog.animate([
-        { opacity: 0, transform: 'scale(.96)' },
-        { opacity: 1, transform: 'scale(1)' }
-      ], { duration: 500, delay: 660, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'both' });
-      effects.push(reveal);
+      passwordOpened = true;
+      effects.push(passwordDialog.animate([
+        { clipPath: `inset(${seamY}px 0 ${height - seamY}px 0)` },
+        { clipPath: 'inset(0px 0px 0px 0px)' }
+      ], { delay: 360, duration: 820, easing: 'cubic-bezier(.55,0,.2,1)', fill: 'both' }));
       document.body.appendChild(cover); cover.showModal();
       cover.focus({ preventScroll: true });
-      const completed = new Promise((resolve) => { finishTransition = resolve; });
-      function finishEarly() { finishTransition(); }
-      addEventListener('resize', finishEarly, { once: true });
-      document.addEventListener('visibilitychange', finishEarly, { once: true });
-      motion.addEventListener('change', finishEarly, { once: true });
-      try {
-        seam.querySelectorAll('path').forEach((path) => {
-          const length = path.getTotalLength();
-          path.style.strokeDasharray = String(length);
-          effects.push(path.animate([{ strokeDashoffset: length }, { strokeDashoffset: 0 }], {
-            duration: 330, easing: 'cubic-bezier(.3,0,.45,1)', fill: 'both'
-          }));
-        });
-        effects.push(seam.animate([{ opacity: 1 }, { opacity: 0 }], { delay: 340, duration: 220, fill: 'both' }));
-        halves.forEach((half, index) => {
-          const direction = index === 0 ? -1 : 1;
-          effects.push(half.animate([
-            { transform: 'translate3d(0,0,0)' },
-            { transform: 'translate3d(0,' + direction * 9 + 'px,0)', offset: .15 },
-            { transform: 'translate3d(0,' + direction * height * .64 + 'px,0)' }
-          ], { delay: 230, duration: 1320, easing: 'cubic-bezier(.65,0,.25,1)', fill: 'both' }));
-          effects.push(half.querySelector('.tear-edge').animate([{ opacity: 0 }, { opacity: .85 }], { delay: 160, duration: 200, fill: 'both' }));
-        });
-        await Promise.race([Promise.all(effects.map((effect) => effect.finished.catch(() => {}))), completed]);
-      } finally {
-        removeEventListener('resize', finishEarly);
-        document.removeEventListener('visibilitychange', finishEarly);
-        motion.removeEventListener('change', finishEarly);
-      }
+      const activateTimer = setTimeout(() => {
+        timers.delete(activateTimer);
+        if (passwordDialog.open && !giftDialog.open) passwordDialog.classList.add('virus-active');
+      }, 360);
+      timers.add(activateTimer);
+
+      halves.forEach((half, index) => {
+        const direction = index === 0 ? -1 : 1;
+        effects.push(half.animate([
+          { transform: 'translateX(0)' },
+          { transform: `translateX(${direction * 3}px)` },
+          { transform: `translateX(${-direction * 3}px)` },
+          { transform: `translateX(${direction * 2}px)` },
+          { transform: `translateX(${-direction * 2}px)` },
+          { transform: 'translateX(0)' }
+        ], { duration: 180, easing: 'steps(1,end)', fill: 'forwards' }));
+        const distance = index === 0 ? seamY + 24 : height - seamY + 24;
+        effects.push(half.animate([
+          { transform: 'translate3d(0,0,0)' },
+          { transform: `translate3d(0,${direction * distance}px,0) rotate(${direction * .7}deg)` }
+        ], { delay: 360, duration: 820, easing: 'cubic-bezier(.55,0,.2,1)', fill: 'forwards' }));
+        effects.push(half.querySelector('.tear-edge').animate([{ opacity: 0 }, { opacity: .85 }], {
+          delay: 300, duration: 120, fill: 'both'
+        }));
+      });
+      seam.querySelectorAll('path').forEach((path) => {
+        const length = path.getTotalLength();
+        path.style.strokeDasharray = String(length);
+        effects.push(path.animate([{ strokeDashoffset: length }, { strokeDashoffset: 0 }], {
+          delay: 180, duration: 240, easing: 'cubic-bezier(.3,0,.45,1)', fill: 'both'
+        }));
+      });
+      effects.push(seam.animate([{ opacity: 1 }, { opacity: 0 }], { delay: 380, duration: 160, fill: 'both' }));
+      effects.push(cover.animate([{ opacity: 1 }, { opacity: 0 }], { delay: 1180, duration: 120, fill: 'both' }));
+      await Promise.race([Promise.all(effects.map((effect) => effect.finished.catch(() => {}))), interrupted]);
+    } catch {
+      // 旧浏览器不支持某种动画时，仍交付完整且可操作的密码界面。
+      if (!passwordOpened && !passwordDialog.open && !giftDialog.open) openPasswordDialog(false);
     } finally {
+      timers.forEach((timer) => clearTimeout(timer));
+      removeListeners.forEach((remove) => remove());
+      settleVirusStage();
       effects.forEach((effect) => effect.cancel());
-      if (cover.open) cover.close();
-      cover.remove();
-      // 保留这个标记到窗口关闭，避免重新触发原来的弹窗入场动画。
-      if (!passwordDialog.open) passwordDialog.classList.remove('through-tear');
-      if (passwordDialog.open && !document.hidden) focusPasswordInput();
+      if (cover?.open) cover.close();
+      cover?.remove();
+      // 不移除 through-tear，避免原生弹窗的默认入场在收尾时重播。
+      if (!passwordDialog.open) passwordDialog.classList.remove('through-tear', 'virus-settled');
+      if (passwordDialog.open && !giftDialog.open && !document.hidden) focusPasswordInput();
     }
   }
 
@@ -912,9 +968,7 @@
     passwordDialog.classList.remove('virus-active');
     finishScrambles();
     try {
-      openPasswordDialog(false);
-      passwordDialog.classList.add('virus-active');
-      focusPasswordInput();
+      await tearOpenPassword();
     }
     finally { transitioning = false; openButton.disabled = false; }
   }
@@ -944,7 +998,7 @@
       // 忽略同一任务中关闭后又重开的旧 close 事件。
       if (dialog.open) return;
       if (dialog === passwordDialog) {
-        passwordDialog.classList.remove('through-tear');
+        passwordDialog.classList.remove('through-tear', 'virus-settled');
         passwordDialog.classList.remove('virus-active');
         document.body.classList.remove('password-open');
         if (giftDialog.open) {
@@ -992,7 +1046,7 @@
 
   // 保留原版入口；礼物内容仍通过同一密码流程解锁。
   window.startErase = enterSurprise;
-  window.openPasswordDialog = () => unlocked ? openGiftDialog() : openPasswordDialog();
+  window.openPasswordDialog = enterSurprise;
   window.openGiftDialog = () => { if (unlocked) openGiftDialog(); };
   motion.addEventListener('change', () => {
     if (motion.matches) {
