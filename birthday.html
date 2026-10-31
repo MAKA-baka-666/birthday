@@ -194,16 +194,16 @@
   .error-shake { animation: error-shake .3s ease !important; }
   /* 仅拆开终端前景；原代码雨继续绘制，裂口后方是真实密码窗口。 */
   #pwd-dialog.through-tear { animation: none; }
-  #pwd-dialog.through-tear.virus-active .virus-header { animation-duration: .4s; animation-delay: 0s; }
-  #pwd-dialog.through-tear.virus-active .virus-core { animation-duration: .42s; animation-delay: .08s; }
-  #pwd-dialog.through-tear.virus-active .virus-clue-window { animation-duration: .42s; animation-delay: .2s; }
-  #pwd-dialog.through-tear.virus-active .virus-input-window { animation-duration: .45s; animation-delay: .34s; }
-  #pwd-dialog.through-tear.virus-active .virus-popup { animation-duration: .5s; animation-delay: var(--tear-delay, 0s); }
-  #pwd-dialog.through-tear .popup-two { --tear-delay: .06s; }
-  #pwd-dialog.through-tear .popup-five { --tear-delay: .12s; }
-  #pwd-dialog.through-tear .popup-three { --tear-delay: .18s; }
-  #pwd-dialog.through-tear .popup-four { --tear-delay: .24s; }
-  #pwd-dialog.through-tear .popup-six { --tear-delay: .3s; }
+  #pwd-dialog.through-tear.virus-active .virus-header { animation-duration: .5s; animation-delay: 0s; }
+  #pwd-dialog.through-tear.virus-active .virus-core { animation-duration: .6s; animation-delay: .14s; }
+  #pwd-dialog.through-tear.virus-active .virus-clue-window { animation-duration: .6s; animation-delay: .34s; }
+  #pwd-dialog.through-tear.virus-active .virus-input-window { animation-duration: .65s; animation-delay: .64s; }
+  #pwd-dialog.through-tear.virus-active .virus-popup { animation-duration: .65s; animation-delay: var(--tear-delay, 0s); }
+  #pwd-dialog.through-tear .popup-two { --tear-delay: .12s; }
+  #pwd-dialog.through-tear .popup-five { --tear-delay: .24s; }
+  #pwd-dialog.through-tear .popup-three { --tear-delay: .36s; }
+  #pwd-dialog.through-tear .popup-four { --tear-delay: .48s; }
+  #pwd-dialog.through-tear .popup-six { --tear-delay: .6s; }
   #pwd-dialog.through-tear.virus-active :is(.security-symbol, .clue) { animation: none; }
   #pwd-dialog.virus-settled :is(.virus-header, .virus-window, .virus-popup, .security-symbol, .clue) { animation: none !important; opacity: 1; translate: none; scale: 1; }
   #pwd-dialog.virus-settled .virus-popup { transform: none; }
@@ -906,13 +906,13 @@
       effects.push(passwordDialog.animate([
         { clipPath: `inset(${seamY}px 0 ${height - seamY}px 0)` },
         { clipPath: 'inset(0px 0px 0px 0px)' }
-      ], { delay: 360, duration: 820, easing: 'cubic-bezier(.55,0,.2,1)', fill: 'both' }));
+      ], { delay: 700, duration: 1300, easing: 'cubic-bezier(.55,0,.2,1)', fill: 'both' }));
       document.body.appendChild(cover); cover.showModal();
       cover.focus({ preventScroll: true });
       const activateTimer = setTimeout(() => {
         timers.delete(activateTimer);
         if (passwordDialog.open && !giftDialog.open) passwordDialog.classList.add('virus-active');
-      }, 360);
+      }, 700);
       timers.add(activateTimer);
 
       halves.forEach((half, index) => {
@@ -924,25 +924,25 @@
           { transform: `translateX(${direction * 2}px)` },
           { transform: `translateX(${-direction * 2}px)` },
           { transform: 'translateX(0)' }
-        ], { duration: 180, easing: 'steps(1,end)', fill: 'forwards' }));
+        ], { duration: 220, easing: 'steps(1,end)', fill: 'forwards' }));
         const distance = index === 0 ? seamY + 24 : height - seamY + 24;
         effects.push(half.animate([
           { transform: 'translate3d(0,0,0)' },
           { transform: `translate3d(0,${direction * distance}px,0) rotate(${direction * .7}deg)` }
-        ], { delay: 360, duration: 820, easing: 'cubic-bezier(.55,0,.2,1)', fill: 'forwards' }));
+        ], { delay: 700, duration: 1300, easing: 'cubic-bezier(.55,0,.2,1)', fill: 'forwards' }));
         effects.push(half.querySelector('.tear-edge').animate([{ opacity: 0 }, { opacity: .85 }], {
-          delay: 300, duration: 120, fill: 'both'
+          delay: 600, duration: 220, fill: 'both'
         }));
       });
       seam.querySelectorAll('path').forEach((path) => {
         const length = path.getTotalLength();
         path.style.strokeDasharray = String(length);
         effects.push(path.animate([{ strokeDashoffset: length }, { strokeDashoffset: 0 }], {
-          delay: 180, duration: 240, easing: 'cubic-bezier(.3,0,.45,1)', fill: 'both'
+          delay: 220, duration: 500, easing: 'cubic-bezier(.3,0,.45,1)', fill: 'both'
         }));
       });
-      effects.push(seam.animate([{ opacity: 1 }, { opacity: 0 }], { delay: 380, duration: 160, fill: 'both' }));
-      effects.push(cover.animate([{ opacity: 1 }, { opacity: 0 }], { delay: 1180, duration: 120, fill: 'both' }));
+      effects.push(seam.animate([{ opacity: 1 }, { opacity: 0 }], { delay: 700, duration: 260, fill: 'both' }));
+      effects.push(cover.animate([{ opacity: 1 }, { opacity: 0 }], { delay: 2000, duration: 200, fill: 'both' }));
       await Promise.race([Promise.all(effects.map((effect) => effect.finished.catch(() => {}))), interrupted]);
     } catch {
       // 旧浏览器不支持某种动画时，仍交付完整且可操作的密码界面。
