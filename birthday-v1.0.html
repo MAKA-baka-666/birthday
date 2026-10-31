@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#030806" />
+<meta name="description" content="给爸爸的一份生日祝福，解开密码，发现藏起来的礼物。" />
+<title>生日快乐，爸爸</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #030806;
+    --panel: #07150e;
+    --green: #6bffa3;
+    --bright: #00ff65;
+    --white: #ecfff2;
+    --muted: #8aa696;
+    --line: #55f59136;
+    --error: #ff9389;
+    --mono: "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono", "Microsoft YaHei", monospace;
+    --serif: Georgia, "Times New Roman", "SimSun", "Songti SC", serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { min-height: 100%; background: var(--bg); }
+  body { min-width: 280px; margin: 0; color: var(--white); font-family: var(--mono); -webkit-font-smoothing: antialiased; }
+  body:has(dialog[open]) { overflow: hidden; }
+  body.password-open .app, body.gift-open .app { visibility: hidden; }
+  button, input { font: inherit; }
+  button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  button:focus-visible { outline: 2px solid var(--green); outline-offset: 5px; }
+  button:disabled { cursor: wait; }
+  .icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  #matrix-bg { position: fixed; inset: 0; display: block; width: 100%; height: 100%; pointer-events: none; opacity: .8; }
+  .shade { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, #030806d9 0, #03080680 40%, #0308061a 77%), linear-gradient(#030806d9, transparent 24%, transparent 73%, #030806e6); }
+  .ambient { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 12% 80%, #00ff6520, transparent 36%), radial-gradient(ellipse at 85% 17%, #00ff6514, transparent 34%); }
+  .ambient::after { content: ""; position: absolute; inset: 65% 0 0; opacity: .13; background-image: linear-gradient(#49ff8c40 1px, transparent 1px), linear-gradient(90deg, #49ff8c40 1px, transparent 1px); background-size: 56px 36px; mask-image: linear-gradient(transparent, #000); }
+  .scanlines { position: fixed; inset: 0; z-index: 5; pointer-events: none; opacity: .06; background: repeating-linear-gradient(transparent 0 3px, #000 3px 4px); }
+  .app { position: relative; z-index: 1; display: flex; flex-direction: column; min-height: 100svh; padding: 0 clamp(24px, 5vw, 80px); }
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 86px; border-bottom: 1px solid #6bffa31c; }
+  .brand { display: flex; align-items: center; gap: 11px; color: #b3c9bb; font-size: 13px; letter-spacing: .5px; }
+  .brand-mark { display: grid; place-items: center; width: 32px; height: 30px; color: var(--green); border: 1px solid #6bffa34a; background: #6bffa309; font-size: 20px; line-height: 1; box-shadow: inset 0 0 12px #6bffa305; }
+  .brand-divider { width: 1px; height: 13px; background: var(--line); margin-inline: 6px; }
+  .brand-caption { color: var(--muted); font-size: 11px; }
+  .main { flex: 1; display: grid; place-items: center; padding: 48px 0; }
+  .greeting { position: relative; isolation: isolate; width: min(740px, 100%); padding: 0 46px 27px; text-align: center; background: linear-gradient(145deg, #11241a9c, #050e09ed 44%, #07150eed); border: 1px solid #6bffa33d; border-radius: 5px; box-shadow: 0 24px 100px #0009, 0 0 100px #36ff7910, inset 0 1px #bcffce0d; backdrop-filter: blur(12px); animation: terminal-arrive .65s ease both; }
+  .greeting::before { content: ""; position: absolute; left: 16%; right: 16%; height: 1px; top: -1px; background: linear-gradient(90deg, transparent, #a8ffc8, transparent); box-shadow: 0 -3px 24px #6bffa338; pointer-events: none; }
+  .greeting::after { content: ""; position: absolute; z-index: -1; inset: -8px; border: 1px solid #6bffa30d; border-radius: 9px; pointer-events: none; }
+  .panel-corner { position: absolute; width: 19px; height: 19px; border-style: solid; border-color: #6bffa3a6; pointer-events: none; filter: drop-shadow(0 0 4px #6bffa326); }
+  .panel-corner.tl { left: -1px; top: -1px; border-width: 1px 0 0 1px; border-radius: 4px 0 0; }
+  .panel-corner.tr { right: -1px; top: -1px; border-width: 1px 1px 0 0; border-radius: 0 4px 0 0; }
+  .panel-corner.bl { left: -1px; bottom: -1px; border-width: 0 0 1px 1px; border-radius: 0 0 0 4px; }
+  .panel-corner.br { right: -1px; bottom: -1px; border-width: 0 1px 1px 0; border-radius: 0 0 4px; }
+  .message-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 -46px; padding: 16px 24px; border-bottom: 1px solid #6bffa324; background: #6bffa304; color: #8bab96; font-size: 10px; letter-spacing: .5px; border-radius: 4px 4px 0 0; }
+  .file-label { display: flex; align-items: center; gap: 10px; }
+  .window-dots { display: inline-flex; gap: 4px; margin-right: 6px; }
+  .window-dots i { width: 5px; height: 5px; border-radius: 50%; background: #6bffa35c; }
+  .window-dots i:nth-child(2) { opacity: .55; }
+  .window-dots i:nth-child(3) { opacity: .3; }
+  .status-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--green); margin: 0 7px 2px 0; box-shadow: 0 0 9px #55f59145; }
+  .recipient { display: flex; align-items: center; justify-content: center; gap: 16px; color: #b1d2be; font-size: 12px; margin: 38px 0 13px; letter-spacing: 4px; }
+  .recipient::before, .recipient::after { content: ""; width: 24px; height: 1px; background: #6bffa338; }
+  .text-block { position: relative; }
+  .scramble { margin: 0; padding-left: .16em; font-family: var(--serif); font-size: clamp(56px, 6.8vw, 88px); font-weight: 400; letter-spacing: .16em; line-height: 1.4; color: #f0fff5; font-variant-numeric: tabular-nums; white-space: nowrap; text-shadow: 0 0 1px #caffda, 0 0 26px #a9ffc536, 0 0 70px #55ff8517; }
+  .awaiting-english { visibility: hidden; }
+  .text-preview { margin: 3px 0 0; color: #a7eac0; font-size: clamp(17px, 1.65vw, 21px); line-height: 1.7; letter-spacing: .22em; white-space: nowrap; min-height: 1.7em; text-shadow: 0 0 20px #6bffa31a; }
+  .scramble-char { display: inline-block; color: #759b824d; white-space: pre; }
+  .scramble-char.locked { color: inherit; animation: lock-in .25s ease both; }
+  .message { color: #b5ccbe; margin: 23px 0 24px; font-size: 13px; letter-spacing: 1px; line-height: 1.8; }
+  .terminal-button { min-height: 49px; display: inline-flex; align-items: center; justify-content: center; gap: 20px; padding: 13px 28px; background: #6bffa309; border: 1px solid #6bffa380; color: #c7ffda; border-radius: 3px; font-size: 13px; letter-spacing: 1px; transition: background .2s, border-color .2s, box-shadow .2s, transform .2s; }
+  .terminal-button:hover { background: #6bffa318; border-color: var(--green); box-shadow: 0 0 26px #6bffa319; transform: translateY(-1px); }
+  .terminal-button:active { background: #55f59126; }
+  .button-symbol { color: var(--green); font-size: 15px; }
+  .surprise-button { position: relative; min-width: 232px; justify-content: space-between; color: #092c17; background: linear-gradient(120deg, #b0ffcc, #69fba2); border-color: #a6ffc6; font-weight: 600; box-shadow: 0 0 24px #6bffa31a, inset 0 1px #e3ffeb8c; }
+  .surprise-button .button-symbol { color: #1c5e35; }
+  .surprise-button:hover { background: linear-gradient(120deg, #cbffdf, #83ffb3); box-shadow: 0 0 36px #6bffa336; }
+  .surprise-button .icon { width: 16px; height: 16px; transition: transform .2s; }
+  .surprise-button:hover .icon { transform: translateX(3px); }
+  .intro-hint { margin: 14px 0 0; color: #7e9f8a; font-size: 10px; line-height: 1.7; }
+  .bottom-bar { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 76px; border-top: 1px solid #6bffa31c; }
+  .page-note { margin: 0; color: #829c8e; font-size: 10px; letter-spacing: 1px; }
+  .journey { display: flex; gap: 22px; list-style: none; margin: 0; padding: 0; }
+  .journey li { display: flex; align-items: center; gap: 9px; font-size: 10px; color: #829e8c; letter-spacing: 1px; }
+  .step-marker { display: inline-grid; place-items: center; width: 21px; height: 21px; color: #829e8c; border: 1px solid #6bffa326; border-radius: 2px; font-size: 9px; letter-spacing: 0; }
+  .journey .current { color: #b6f4cb; }
+  .journey .current .step-marker { background: #6bffa31a; border-color: #6bffa380; color: var(--green); box-shadow: 0 0 12px #6bffa312; }
+  .journey .done .step-marker { border-color: #6b9c7d66; background: #6b9c7d0d; color: #92b9a0; }
+
+  /* 与代码雨同色的终端窗口；祝福和线索始终保持清晰可读。 */
+  dialog { color-scheme: dark; margin: auto; width: min(488px, calc(100% - 32px)); max-height: calc(100svh - 32px); padding: 0; color: var(--white); font-family: var(--mono); background: linear-gradient(135deg, #12271cf5, #06110bf5 47%); border: 0; border-left: 2px solid #81ffac9c; border-bottom: 1px solid #81ffac70; clip-path: polygon(0 0, 97% 0, 100% 5%, 98% 100%, 3% 97%, 0 91%); box-shadow: 0 0 0 5px #6bffa305, 0 30px 120px #000c, 0 0 90px #00ff651a, inset 0 1px #d8ffe317; overflow: auto; }
+  dialog::backdrop { background: transparent; backdrop-filter: none; }
+  #pwd-dialog { clip-path: polygon(0 0, 94% 0, 100% 8%, 98% 96%, 8% 100%, 0 91%); border-left: 2px solid #81ffac9c; border-bottom: 1px solid #81ffac70; }
+  #gift-dialog { clip-path: polygon(4% 0, 100% 0, 100% 88%, 91% 100%, 0 94%, 2% 9%); border-top: 1px solid #81ffac70; border-right: 2px solid #81ffac9c; }
+  #pwd-dialog .terminal-header { margin-right: 9px; border-left: 1px dashed #6bffa35c; }
+  #gift-dialog .terminal-header { margin-left: 9px; border-right: 1px dashed #6bffa35c; }
+  #pwd-dialog { overflow: visible; border-color: #ff665d; background: linear-gradient(135deg, #210d10fa, #090b0bf7 52%, #14090dfa); box-shadow: 0 0 0 4px #ff514014, 0 30px 120px #000d, 0 0 55px #ff263326; }
+  #pwd-dialog .terminal-header { border-bottom-color: #ff625b66; background: linear-gradient(90deg, #ff493313, transparent); }
+  #pwd-dialog .window-title .icon, #pwd-dialog .window-state { color: #ff8178; }
+  #pwd-dialog .security-symbol { color: #ff766d; border-color: #ff625b7a; background: #ff49331b; box-shadow: 0 0 24px #ff493329; }
+  #pwd-dialog .pwd-input { border-color: #ff665d70; }
+  #pwd-dialog .pwd-input:focus { border-color: #ff9a8f; box-shadow: 0 0 0 3px #ff635b14, 0 0 21px #ff635b19, inset 0 2px 14px #0004; }
+  .virus-burst { position: absolute; z-index: 1; inset: 0; pointer-events: none; overflow: visible; visibility: hidden; }
+  .virus-popup { position: absolute; width: min(270px, 74vw); padding: 10px 13px 12px; color: #ffe8e4; border: 1px solid #ff726a; border-left: 4px solid #ff5148; background: linear-gradient(125deg, #270d10f5, #080909f2); box-shadow: 0 8px 34px #000b, 0 0 22px #ff463433; clip-path: polygon(0 0, 96% 0, 100% 12%, 98% 100%, 4% 96%); opacity: 0; transform: scale(.4) rotate(-8deg); }
+  .virus-bar { display: block; margin-bottom: 5px; color: #ff8279; font-size: 9px; letter-spacing: 1.4px; }
+  .virus-popup b, .virus-popup small { display: block; }
+  .virus-popup b { font-size: 12px; letter-spacing: .5px; }
+  .virus-popup small { margin-top: 3px; color: #d2a9a7; font-size: 10px; }
+  .popup-one { top: 7%; left: 2%; }
+  .popup-two { top: 25%; right: 1%; }
+  .popup-three { bottom: 25%; left: 3%; }
+  .popup-four { bottom: 7%; right: 2%; }
+  #pwd-dialog.virus-active .virus-burst { visibility: visible; }
+  #pwd-dialog.virus-active .virus-popup { animation: virus-popup .9s cubic-bezier(.15,.8,.2,1) both; }
+  #pwd-dialog.virus-active .popup-two { animation-delay: .13s; }
+  #pwd-dialog.virus-active .popup-three { animation-delay: .26s; }
+  #pwd-dialog.virus-active .popup-four { animation-delay: .39s; }
+  #pwd-dialog.virus-active { animation: virus-window-shake .75s .08s ease both; }
+  #pwd-dialog.virus-active.error-shake { animation: error-shake .3s ease; }
+  #pwd-dialog.virus-active .virus-popup { animation-duration: 2.6s; }
+  #pwd-dialog.virus-active .popup-two { animation-delay: .35s; }
+  #pwd-dialog.virus-active .popup-three { animation-delay: .7s; }
+  #pwd-dialog.virus-active .popup-four { animation-delay: 1.05s; }
+  @keyframes virus-popup { 0% { opacity: 0; transform: scale(.4) rotate(-8deg); } 8% { opacity: 1; transform: scale(1.06) rotate(1deg); } 18% { opacity: 1; transform: scale(1) rotate(0); } 100% { opacity: 1; transform: scale(1) rotate(0); } }
+  @keyframes virus-window-shake { 0%, 100% { translate: 0 0; } 20% { translate: -5px 2px; } 40% { translate: 4px -2px; } 60% { translate: -3px 1px; } 80% { translate: 2px 0; } }
+  #pwd-dialog { position: fixed; inset: 0; width: 100vw; height: 100dvh; max-width: none; max-height: 100dvh; margin: 0; padding: clamp(18px, 4vw, 54px); flex-direction: column; justify-content: center; align-items: center; gap: 12px; overflow-y: auto; clip-path: none; border: 0; background: transparent; box-shadow: none; }
+  #pwd-dialog[open] { display: flex; }
+  #pwd-dialog::before { display: none; }
+  #pwd-dialog .virus-header { position: relative; z-index: 2; width: min(780px, 100%); min-height: 47px; margin: 0 0 -8px; padding: 8px 18px; border: 0; border-left: 3px solid #ff5148; border-bottom: 1px dashed #ff766e99; clip-path: polygon(0 0, 98% 0, 100% 20%, 99% 100%, 2% 94%); background: linear-gradient(100deg, #270d10f5, #080909ed); box-shadow: 0 8px 30px #0008; transform: translateX(-10px) rotate(-.4deg); }
+  #pwd-dialog .virus-header .window-title, #pwd-dialog .virus-header .window-title .icon, #pwd-dialog .virus-header .window-state { color: #ff938b; }
+  #pwd-dialog .virus-windows { position: relative; z-index: 2; width: min(780px, 100%); max-height: none; margin: 0; padding: 0; display: grid; grid-template-columns: .92fr 1.08fr; grid-template-areas: "core core" "clue input"; align-items: stretch; gap: 6px; overflow: visible; border: 0; clip-path: none; background: transparent; box-shadow: none; }
+  #pwd-dialog .virus-window { min-width: 0; padding: 15px 17px; border: 0; border-left: 2px solid #ff6a61; border-bottom: 1px dashed #ff655d8a; background: linear-gradient(125deg, #1c0b0df2, #080909f0); box-shadow: 0 12px 34px #0009, 0 0 18px #ff463318; }
+  #pwd-dialog .virus-core { grid-area: core; display: grid; grid-template-columns: 56px 1fr; grid-template-rows: auto auto auto; align-items: center; column-gap: 15px; clip-path: polygon(0 0, 97% 0, 100% 12%, 99% 100%, 2% 96%); transform: translateX(8px) rotate(.35deg); }
+  #pwd-dialog .virus-core .prompt { grid-column: 1 / -1; margin: 0 0 10px; color: #ffaaa3; }
+  #pwd-dialog .virus-core .security-symbol { grid-column: 1; grid-row: 2 / 4; margin: 0; }
+  #pwd-dialog .virus-core .dialog-title { grid-column: 2; margin: 0; font-size: 23px; }
+  #pwd-dialog .virus-core .dialog-intro { grid-column: 2; margin: 2px 0 0; }
+  #pwd-dialog .virus-clue-window { grid-area: clue; align-self: center; margin-right: -8px; clip-path: polygon(2% 0, 100% 8%, 96% 100%, 0 93%); transform: translate(5px, -7px) rotate(-.65deg); }
+  #pwd-dialog .virus-clue-window .clue { margin: 0; padding: 5px 3px 8px 12px; border: 0; border-left: 2px solid #ff746b; background: transparent; clip-path: none; transform: none; }
+  #pwd-dialog .virus-clue-window .clue-label { color: #ff998f; }
+  #pwd-dialog .virus-clue-window .clue-text { color: #f0d0cc; }
+  #pwd-dialog .virus-input-window { grid-area: input; margin-left: -8px; clip-path: polygon(0 0, 98% 5%, 100% 100%, 4% 96%); transform: translate(-3px, 4px) rotate(.45deg); }
+  #pwd-dialog .virus-input-window .pwd-label { color: #ffb2aa; }
+  #pwd-dialog .virus-input-window .pwd-input { background: #090809; }
+  #pwd-dialog .virus-input-window .submit { margin-top: 15px; background: linear-gradient(115deg, #ffaaa0, #ff655b); border-color: #ffb0a7; color: #250a0b; box-shadow: 0 0 20px #ff514822; }
+  #pwd-dialog .virus-input-window .submit .button-symbol { color: #4a1313; }
+  #pwd-dialog .virus-input-window .dialog-footnote { color: #ba918e; }
+  #pwd-dialog.virus-active .virus-header { animation: virus-card-in .48s cubic-bezier(.15,.8,.2,1) both; }
+  #pwd-dialog.virus-active .virus-core { animation: virus-card-in .5s .18s cubic-bezier(.15,.8,.2,1) both; }
+  #pwd-dialog.virus-active .virus-clue-window { animation: virus-card-in .52s .48s cubic-bezier(.15,.8,.2,1) both; }
+  #pwd-dialog.virus-active .virus-input-window { animation: virus-card-in .55s .78s cubic-bezier(.15,.8,.2,1) both; }
+  #pwd-dialog:not(.virus-active) .virus-header,
+  #pwd-dialog:not(.virus-active) .virus-window { visibility: hidden; }
+  #pwd-dialog.virus-active .virus-header,
+  #pwd-dialog.virus-active .virus-window { visibility: visible; }
+  @keyframes virus-card-in { from { opacity: 0; translate: 0 24px; scale: .88; } 70% { opacity: 1; translate: 0 -4px; scale: 1.02; } to { opacity: 1; translate: 0 0; scale: 1; } }
+  dialog { scrollbar-width: thin; scrollbar-color: #345c43 #08160e; }
+  dialog::-webkit-scrollbar { width: 5px; }
+  dialog::-webkit-scrollbar-thumb { background: #345c43; border-radius: 3px; }
+  dialog::-webkit-scrollbar-track { background: #08160e; }
+  dialog[open] { animation: terminal-dialog-in .52s cubic-bezier(.2,.8,.2,1) both; }
+  dialog::before { content: ""; position: absolute; z-index: 2; top: -18px; left: 4%; width: 92%; height: 2px; background: linear-gradient(90deg, transparent, #a5ffc4, #6bffa366, transparent); box-shadow: 0 0 16px #6bffa355; pointer-events: none; animation: dialog-scan 1.3s .15s ease-out both; }
+  .terminal-header { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 49px; padding: 8px 14px 8px 23px; background: #6bffa307; border-bottom: 1px dashed #6bffa352; transform: translateX(5px); }
+  .window-title { display: flex; align-items: center; gap: 10px; color: #bad6c4; font-size: 11px; letter-spacing: .5px; }
+  .window-state { display: inline-block; margin-left: auto; color: #8dab98; font-size: 9px; letter-spacing: 1px; }
+  .window-title .icon { width: 15px; height: 15px; color: var(--green); }
+  .close { display: grid; place-items: center; background: none; color: #8aa696; border: 0; width: 34px; height: 32px; }
+  .close:hover { color: var(--white); background: #55f5910f; }
+  .close:focus-visible { outline-offset: 0; }
+  .dialog-content { position: relative; padding: 29px 32px 32px; }
+  .prompt { margin: 0 0 17px; color: #85af94; font-size: 11px; line-height: 1.8; overflow-wrap: anywhere; }
+  .prompt span { color: var(--green); margin-right: 8px; }
+  .security-symbol { display: grid; place-items: center; width: 43px; height: 43px; margin: 0 0 17px; color: var(--green); background: #6bffa309; border: 1px solid #6bffa33b; box-shadow: inset 0 0 17px #6bffa305; border-radius: 3px; }
+  .security-symbol .icon { width: 22px; height: 22px; }
+  .dialog-title { margin: 0 0 12px; font-size: 25px; letter-spacing: 2px; font-weight: 500; line-height: 1.5; }
+  .dialog-intro { margin: 0 0 24px; color: #a0b8a9; font-size: 12px; line-height: 1.9; }
+  .clue { position: relative; margin: 0 0 24px 5px; padding: 15px 17px 17px 21px; border: 0; border-left: 2px solid #6bffa38c; border-bottom: 1px dashed #6bffa34d; background: linear-gradient(110deg, #6bffa30e, #6bffa301); clip-path: polygon(2% 0, 100% 7%, 97% 100%, 0 92%); }
+  .clue-label { margin: 0 0 8px; color: #8edba7; font-size: 10px; letter-spacing: 2px; }
+  .clue-text { margin: 0; color: #bfd3c7; font-size: 13px; line-height: 1.95; }
+  .pwd-label { display: block; margin-bottom: 11px; color: #b8cdbe; font-size: 12px; }
+  .password-field { position: relative; }
+  .input-prompt { position: absolute; left: 16px; top: 16px; color: var(--green); font-size: 16px; pointer-events: none; }
+  .pwd-input { width: 100%; height: 53px; padding: 12px 17px 12px 40px; border: 1px solid #6bffa345; border-radius: 3px; background: #020a06; color: var(--white); font-size: 20px; letter-spacing: 6px; font-variant-numeric: tabular-nums; outline: none; caret-color: var(--green); box-shadow: inset 0 2px 14px #0004; transition: border-color .2s, box-shadow .2s; }
+  .pwd-input::placeholder { color: #7b9e88; font-size: 12px; letter-spacing: 1px; }
+  .pwd-input:focus { border-color: #9affbf; box-shadow: 0 0 0 3px #6bffa30c, 0 0 21px #6bffa30c, inset 0 2px 14px #0004; }
+  .pwd-input[aria-invalid="true"] { border-color: #ff9389b3; box-shadow: 0 0 0 3px #ff938908; }
+  .pwd-error { color: var(--error); font-size: 12px; line-height: 1.8; margin: 13px 0 0; padding-left: 13px; border-left: 2px solid #ff93897a; }
+  .pwd-error strong { display: block; font-weight: 500; }
+  .pwd-error span { color: #d7a39d; }
+  .submit { width: 100%; justify-content: space-between; margin-top: 20px; padding-inline: 19px; background: linear-gradient(115deg, #b0ffcc, #69fba2); border-color: #a6ffc6; color: #062811; font-weight: 600; box-shadow: 0 0 22px #6bffa317, inset 0 1px #e3ffeb80; }
+  .submit .button-symbol { color: #17452a; font-size: 12px; font-weight: 400; }
+  .submit:hover { background: #7cffa9; border-color: #7cffa9; box-shadow: 0 0 24px #55f59112; }
+  .submit:active { background: #42d97d; }
+  .dialog-footnote { margin: 15px 0 0; color: #8aa696; font-size: 10px; line-height: 1.8; }
+  .success-mark { position: relative; display: inline-grid; place-items: center; margin: 8px 0 27px; width: 53px; height: 53px; color: #aeffca; border: 1px solid #6bffa373; background: #6bffa30b; border-radius: 4px; box-shadow: 0 0 22px #6bffa314, inset 0 0 17px #6bffa308; }
+  .success-mark::before { content: ""; position: absolute; inset: -6px; border: 1px solid #6bffa31a; border-radius: 7px; }
+  .success-mark .icon { width: 25px; height: 25px; }
+  #gift-dialog[open] .success-mark path { stroke-dasharray: 30; stroke-dashoffset: 30; animation: success-draw .55s .15s ease forwards; }
+  .gift-title { font-family: var(--serif); font-size: 34px; font-weight: 400; letter-spacing: 2px; margin: 0 0 12px; line-height: 1.5; text-shadow: 0 0 30px #6bffa322; }
+  .gift-location { margin: 5px 0 0; font-size: 23px; letter-spacing: 2px; color: #d1ffdf; line-height: 1.6; }
+  .gift-note { margin: 0; color: #a2bdac; font-size: 12px; line-height: 1.9; }
+  .gift-output { position: relative; overflow: hidden; padding: 18px 19px; margin: 23px 4px 23px 0; border: 0; border-left: 2px solid #6bffa3a6; border-bottom: 1px dashed #6bffa366; clip-path: polygon(0 0, 98% 6%, 100% 100%, 3% 94%); background: linear-gradient(120deg, #6bffa311, #6bffa302); }
+  .gift-output::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, #6bffa310, transparent); pointer-events: none; }
+  #gift-dialog[open] .gift-output::after { animation: output-scan .9s .25s ease both; }
+  .gift-bottom { display: flex; align-items: center; gap: 8px; color: #9ad6ad; font-size: 10px; margin: 0 0 24px; transform: translateX(-7px) rotate(-.5deg); }
+  .gift-button { width: 100%; }
+  .error-shake { animation: error-shake .3s ease !important; }
+  /* 临时顶层窗口承载画面副本，撕开的缺口里直接显露真正的密码终端。 */
+  #pwd-dialog.through-tear { animation: none; }
+  .screen-tear { position: fixed; inset: 0; width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; overflow: hidden; isolation: isolate; }
+  .screen-tear[open] { animation: none; }
+  .screen-tear::backdrop { background: transparent; backdrop-filter: none; }
+  .tear-half, .tear-scene { position: absolute; inset: 0; overflow: hidden; }
+  .tear-half { will-change: transform; }
+  .tear-scene { z-index: 0; background: var(--bg); pointer-events: none; }
+  .tear-scene *, .tear-scene *::before, .tear-scene *::after { animation: none !important; transition: none !important; caret-color: transparent; }
+  .tear-scene .shade, .tear-scene .ambient, .tear-scene .scanlines, .tear-matrix { position: absolute; inset: 0; }
+  .tear-matrix { display: block; width: 100%; height: 100%; opacity: .8; }
+  .tear-edge, .tear-seam { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .tear-edge { z-index: 1; stroke: #c1ffd8; stroke-width: 1.5; filter: drop-shadow(0 0 5px #6bffa3) drop-shadow(0 0 15px #26ef73); }
+  .tear-seam { z-index: 2; stroke: #d1ffe2; stroke-width: 1.6; filter: drop-shadow(0 0 6px #6bffa3) drop-shadow(0 0 18px #00ff65); }
+  @keyframes terminal-open { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes lock-in { from { opacity: .45; } to { opacity: 1; } }
+  @keyframes error-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+  @keyframes terminal-arrive { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
+  @keyframes success-draw { to { stroke-dashoffset: 0; } }
+  @keyframes output-scan { to { transform: translateX(100%); } }
+  @keyframes terminal-dialog-in { from { opacity: 0; transform: translateY(18px) scale(.97); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
+  @keyframes dialog-scan { 0% { top: -18px; opacity: 0; } 15% { opacity: .95; } 100% { top: calc(100% + 14px); opacity: 0; } }
+  #pwd-dialog[open] .security-symbol { animation: symbol-lock .65s .3s cubic-bezier(.2,.8,.2,1) both; }
+  #pwd-dialog[open] .clue { animation: clue-arrive .55s .42s both; }
+  #gift-dialog[open] .success-mark { animation: gift-confirm .65s .12s cubic-bezier(.2,.8,.2,1) both; }
+  #gift-dialog[open] .gift-output { animation: gift-output-in .65s .25s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes symbol-lock { from { opacity: 0; transform: translate(-8px,5px) rotate(-12deg) scale(.8); } to { opacity: 1; transform: none; } }
+  @keyframes clue-arrive { from { opacity: 0; transform: translate(14px,-5px); } to { opacity: 1; transform: none; } }
+  @keyframes gift-confirm { 0% { opacity: 0; transform: translateY(8px) rotate(-8deg) scale(.72); } 65% { opacity: 1; transform: translateY(-2px) rotate(3deg) scale(1.08); } 100% { transform: rotate(-2deg) scale(1); } }
+  @keyframes gift-output-in { from { opacity: 0; transform: translate(-10px,6px); } to { opacity: 1; transform: none; } }
+  @media (max-width: 680px) {
+    .app { padding: 0 22px; }
+    .topbar { min-height: 74px; }
+    .brand { font-size: 12px; gap: 8px; }
+    .brand-caption, .brand-divider { display: none; }
+    .main { padding: 38px 0; }
+    .greeting { padding: 0 23px 22px; }
+    .message-header { margin-inline: -23px; padding: 15px 17px; font-size: 9px; letter-spacing: 0; }
+    .window-dots { gap: 3px; margin-right: 1px; }
+    .window-dots i { width: 4px; height: 4px; }
+    .recipient { margin: 30px 0 18px; font-size: 11px; }
+    .scramble { font-size: clamp(39px, 10.2vw, 65px); letter-spacing: .1em; padding-left: .1em; }
+    .text-preview { font-size: clamp(15px, 3.7vw, 21px); letter-spacing: .1em; }
+    .message { font-size: 11px; letter-spacing: .4px; margin: 22px 0; }
+    .terminal-button { min-height: 47px; padding: 12px 22px; font-size: 12px; }
+    .intro-hint { font-size: 9px; }
+    .bottom-bar { min-height: 81px; flex-direction: column; justify-content: center; gap: 12px; }
+    .page-note { font-size: 9px; }
+    .journey { gap: 24px; }
+    .journey li { gap: 7px; }
+    .step-marker { width: 19px; height: 19px; font-size: 8px; }
+    .dialog-content { padding: 24px 23px; }
+    dialog { transform-origin: center; }
+    #gift-dialog { clip-path: polygon(5% 0, 100% 0, 100% 89%, 91% 100%, 0 94%, 2% 8%); }
+    #pwd-dialog { padding: 12px; justify-content: center; gap: 5px; }
+    #pwd-dialog .virus-header { margin-bottom: -5px; transform: translateX(-5px) rotate(-.3deg); }
+    #pwd-dialog .virus-windows { grid-template-columns: 1fr; grid-template-areas: "core" "clue" "input"; gap: 5px; }
+    #pwd-dialog .virus-window { padding: 12px 14px; }
+    #pwd-dialog .virus-core { grid-template-columns: 44px 1fr; column-gap: 11px; }
+    #pwd-dialog .virus-core .security-symbol { width: 39px; height: 39px; }
+    #pwd-dialog .virus-core .dialog-title { font-size: 20px; }
+    #pwd-dialog .virus-clue-window { margin-right: -4px; transform: translate(3px, -3px) rotate(-.35deg); }
+    #pwd-dialog .virus-input-window { margin-left: -4px; transform: translate(-2px, 2px) rotate(.25deg); }
+    #pwd-dialog .virus-input-window .submit { min-height: 48px; }
+    .virus-popup { width: min(230px, 66vw); padding: 8px 10px; }
+    .popup-one { top: 5%; left: 1%; }
+    .popup-two { top: 24%; right: 1%; }
+    .popup-three { bottom: 23%; left: 1%; }
+    .popup-four { bottom: 5%; right: 2%; }
+    .terminal-header { padding-left: 20px; }
+    .clue { margin-left: 3px; padding-inline: 16px; }
+    .gift-output { margin-inline: 0 3px; padding-inline: 16px; }
+    .terminal-header { padding-left: 20px; }
+    .dialog-title { font-size: 23px; }
+    .gift-title { font-size: 29px; }
+    .gift-location { font-size: 22px; }
+  }
+  @media (max-width: 360px) {
+    .app { padding-inline: 15px; }
+    .greeting { padding-inline: 17px; }
+    .message-header { margin-inline: -17px; padding-inline: 12px; letter-spacing: 0; }
+    .message-header .window-dots { display: none; }
+    .surprise-button { min-width: 208px; }
+    .scramble { font-size: 38px; }
+    .text-preview { font-size: 15px; }
+    .message { font-size: 10px; }
+    .gift-title { font-size: 26px; }
+    .dialog-title { font-size: 20px; letter-spacing: 1px; }
+  }
+  @media (max-height: 650px) and (max-width: 680px) {
+    .dialog-content { padding-block: 18px; }
+    .prompt { margin-bottom: 10px; }
+    .dialog-intro { margin-bottom: 16px; }
+    .clue { padding: 12px 14px; margin-bottom: 16px; }
+    .dialog-footnote { margin-top: 12px; }
+    .security-symbol { width: 36px; height: 36px; margin-bottom: 12px; }
+  }
+  @media (min-width: 681px) and (min-height: 651px) and (max-height: 820px) {
+    .topbar { min-height: 70px; }
+    .main { padding-block: 32px; }
+    .recipient { margin-top: 27px; }
+    .scramble { font-size: 72px; }
+    .message { margin-block: 19px; }
+    .bottom-bar { min-height: 64px; }
+  }
+  @media (max-height: 650px) and (min-width: 681px) {
+    .topbar { min-height: 64px; }
+    .main { padding: 24px 0; }
+    .greeting { padding-block: 0 22px; }
+    .recipient { margin-top: 22px; }
+    .scramble { font-size: 52px; }
+    .message { margin-block: 18px; }
+    .bottom-bar { min-height: 56px; }
+  }
+  /* Birthday terminal: asymmetrical, mobile-first layout with one deliberate startup sequence. */
+  .greeting {
+    clip-path: polygon(0 0, 97% 0, 100% 7%, 98.5% 100%, 3% 97%, 0 90%);
+    transform: rotate(-.55deg);
+    border: 0;
+    border-left: 2px solid #71ff9a99;
+    border-bottom: 1px solid #6bffa342;
+    border-radius: 0;
+    background: linear-gradient(112deg, #0b1b12ed 0%, #07130fd9 64%, #030806d9 100%);
+    box-shadow: 18px 16px 0 -13px #62ff8a55, 36px 29px 0 -27px #62ff8a3b, 0 24px 100px #0009;
+    animation: terminal-boot .75s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .greeting::before { left: 5%; right: 0; top: 0; height: 2px; background: linear-gradient(90deg, #92ffb7, #6bffa355 55%, transparent); box-shadow: 0 0 14px #6bffa344; animation: terminal-scan 1.6s .45s ease-out both; }
+  .greeting::after { inset: 7px -7px -6px 8px; border: 0; border-right: 1px solid #6bffa344; border-bottom: 1px dashed #6bffa344; border-radius: 0; }
+  .panel-corner { display: none; }
+  .message-header { margin-inline: -46px; padding-inline: 38px 30px; background: #6bffa306; transform: translateX(8px) rotate(.35deg); }
+  .file-label { transform: translateX(-7px); }
+  .recipient { justify-content: flex-start; padding-left: clamp(12px, 6vw, 64px); transform: translateX(-8px); }
+  .recipient::before { display: none; }
+  .scramble { text-align: left; padding-left: clamp(12px, 6vw, 64px); text-shadow: -3px 3px 0 #2cff6c35, 0 0 34px #5bff8a55; animation: title-materialize .8s .3s both; }
+  .text-preview { text-align: right; padding-right: clamp(10px, 8vw, 78px); transform: rotate(-1.5deg); }
+  .surprise-button { display: flex; width: min(300px, 100%); min-height: 56px; margin: 22px 5% 0 auto; transform: rotate(.8deg); clip-path: polygon(0 0, 100% 0, 96% 100%, 3% 92%); animation: button-materialize .55s 1s both; }
+  .surprise-launch { visibility: hidden; opacity: 0; margin-top: 18px; padding: 10px 14px 14px; border-left: 2px solid #ffd36e; border-bottom: 1px dashed #ffd36e66; background: linear-gradient(100deg, #ffc85712, transparent 85%); clip-path: polygon(0 0, 97% 5%, 100% 100%, 3% 94%); transform: translateX(8px) rotate(.3deg); }
+  .intro-complete .surprise-launch { visibility: visible; animation: warning-arrive .65s cubic-bezier(.2,.8,.2,1) both; }
+  .launch-warning { margin: 0 0 7px; color: #f5d58b; font-size: 10px; letter-spacing: .4px; }
+  .launch-warning span { color: #ffd36e; font-weight: 700; }
+  .surprise-launch .surprise-button { margin-top: 0; }
+  .surprise-button:hover { transform: rotate(0) translateY(-2px); }
+  .bottom-bar { position: relative; padding: 12px 18px 12px 24px; border: 0; border-left: 1px dashed #6bffa377; border-bottom: 1px solid #6bffa344; background: linear-gradient(100deg, #07140ef2, #030806b8); clip-path: polygon(2% 0, 100% 7%, 97% 100%, 0 91%); transform: rotate(.55deg); }
+  .page-note { transform: translateX(7px); }
+  .journey { transform: translateX(-7px) rotate(-.5deg); }
+  @keyframes terminal-boot { from { opacity: 0; transform: translateY(14px) rotate(-1.4deg); filter: blur(3px); } to { opacity: 1; transform: rotate(-.55deg); filter: none; } }
+  @keyframes terminal-scan { 0% { transform: translateY(-20px); opacity: 0; } 18% { opacity: .9; } 100% { transform: translateY(100px); opacity: 0; } }
+  @keyframes title-materialize { 0% { opacity: 0; filter: blur(8px); letter-spacing: .35em; } 65% { opacity: 1; filter: blur(0); } 100% { letter-spacing: .16em; } }
+  @keyframes button-materialize { from { opacity: 0; transform: translateY(9px) rotate(2deg); } to { opacity: 1; transform: rotate(.8deg); } }
+  @keyframes warning-arrive { from { opacity: 0; transform: translate(18px,-4px) rotate(1deg); } to { opacity: 1; transform: translateX(8px) rotate(.3deg); } }
+  @media (max-width: 680px) {
+    .greeting { padding: 0 23px 22px; transform: rotate(-.8deg); clip-path: polygon(0 0, 96% 0, 100% 7%, 97% 100%, 5% 96%, 0 88%); }
+    .message-header { margin-inline: -23px; padding: 14px 20px 14px 28px; }
+    .recipient { margin: 25px 0 15px; padding-left: 10px; }
+    .scramble { padding-left: 8px; font-size: clamp(39px, 10.2vw, 65px); letter-spacing: .1em; }
+    .text-preview { padding-right: 8px; }
+    .surprise-launch { margin-top: 16px; padding: 9px 10px 12px; }
+    .launch-warning { font-size: 9px; }
+    .surprise-launch .surprise-button { width: 100%; margin: 0; min-height: 56px; justify-content: center; transform: rotate(.6deg); }
+    .bottom-bar { align-items: stretch; width: calc(100% - 8px); margin: 0 0 4px 8px; min-height: 81px; padding: 12px 14px 12px 20px; gap: 8px; }
+    .journey { gap: 18px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } #gift-dialog[open] .success-mark path { stroke-dashoffset: 0; } }
+</style>
+</head>
+<body>
+<canvas id="matrix-bg" aria-hidden="true"></canvas>
+<div class="shade" aria-hidden="true"></div>
+<div class="ambient" aria-hidden="true"></div>
+<div class="scanlines" aria-hidden="true"></div>
+<div class="app">
+  <main class="main">
+    <section class="greeting" aria-labelledby="scramble">
+      <span class="panel-corner tl" aria-hidden="true"></span><span class="panel-corner tr" aria-hidden="true"></span><span class="panel-corner bl" aria-hidden="true"></span><span class="panel-corner br" aria-hidden="true"></span>
+      <div class="message-header"><span class="file-label"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span>birthday.message</span></div>
+      <p class="recipient">致 爸爸</p>
+      <div class="text-block" id="text-block">
+        <h1 class="scramble" id="scramble" aria-label="生日快乐">生日快乐</h1>
+        <p class="text-preview awaiting-english" id="scramble-en" aria-label="Happy Birthday" lang="en">Happy Birthday</p>
+      </div>
+      <div class="surprise-launch" role="status" aria-live="polite">
+        <p class="launch-warning"><span aria-hidden="true">[!]</span> 扫描完成：检测到一份待开启惊喜</p>
+        <button class="terminal-button surprise-button" id="open-surprise" type="button" aria-haspopup="dialog"><span class="button-symbol" aria-hidden="true">&gt;_</span><span id="open-label">开启惊喜</span><svg class="icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h13m-5-5 5 5-5 5"/></svg></button>
+      </div>
+    </section>
+  </main>
+  <footer class="bottom-bar">
+    <p class="page-note">愿新的一岁，平安、自在、常有欢喜。</p>
+  </footer>
+</div>
+
+<dialog id="pwd-dialog" aria-labelledby="pwd-title" aria-describedby="pwd-intro">
+  <div class="virus-burst" aria-hidden="true">
+    <div class="virus-popup popup-one"><span class="virus-bar">[!] SYSTEM WARNING</span><b>检测到异常进程</b><small>gift.exe 正在尝试绕过加密</small></div>
+    <div class="virus-popup popup-two"><span class="virus-bar">[!] MEMORY LEAK</span><b>发现隐藏数据</b><small>缓存线索：让人放松的物品</small></div>
+    <div class="virus-popup popup-three"><span class="virus-bar">[!] FILE EXPOSED</span><b>礼物档案已感染</b><small>位置数据已被密码锁定</small></div>
+    <div class="virus-popup popup-four"><span class="virus-bar">[!] ACCESS DENIED</span><b>系统拒绝猜测</b><small>请根据线索找到正确密码</small></div>
+  </div>
+  <header class="terminal-header virus-header">
+    <span class="window-title"><svg class="icon" viewBox="0 0 20 20" aria-hidden="true"><path d="m3 5 5 5-5 5m8 0h6"/></svg>gift.unlock</span>
+    <span class="window-state">等待解锁</span>
+    <span aria-hidden="true" style="width:34px"></span>
+  </header>
+  <form class="dialog-content virus-windows" id="pwd-form" novalidate>
+    <section class="virus-window virus-core">
+      <p class="prompt"><span aria-hidden="true">&gt;</span>检测到一份为爸爸准备的礼物</p>
+      <div class="security-symbol" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></svg></div>
+      <h2 class="dialog-title" id="pwd-title">输入密码，解锁惊喜</h2>
+      <p class="dialog-intro" id="pwd-intro">密码藏在生活里，跟着线索找找看。</p>
+    </section>
+    <section class="virus-window virus-clue-window"><div class="clue"><p class="clue-label">泄露的线索 // 01</p><p class="clue-text">找到家中能让人放松的物品，这样就能成功获得密码吧</p></div></section>
+    <section class="virus-window virus-input-window">
+      <label class="pwd-label" for="pwd-input">输入找到的密码</label>
+      <div class="password-field"><span class="input-prompt" aria-hidden="true">&gt;</span><input class="pwd-input" id="pwd-input" type="text" inputmode="numeric" placeholder="等待输入..." autocomplete="off" spellcheck="false" aria-describedby="pwd-error"/></div>
+      <p class="pwd-error" id="pwd-error" role="alert" hidden><strong>[!] 密码错误</strong><span>请不要猜测密码，完整体验线索后再试。</span></p>
+      <button class="terminal-button submit" type="submit"><span>验证密码</span><span class="button-symbol" aria-hidden="true">[ Enter ]</span></button>
+      <p class="dialog-footnote">不着急，礼物会一直等着你。</p>
+    </section>
+  </form>
+</dialog>
+<dialog id="gift-dialog" aria-labelledby="gift-title" aria-describedby="gift-description">
+  <header class="terminal-header">
+    <span class="window-title"><svg class="icon" viewBox="0 0 20 20" aria-hidden="true"><path d="m3 5 5 5-5 5m8 0h6"/></svg>gift.unlocked</span>
+    <span class="window-state">解锁成功</span>
+    <button class="close" type="button" data-close="gift-dialog" aria-label="关闭礼物提示"><svg class="icon" viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg></button>
+  </header>
+  <div class="dialog-content">
+    <p class="prompt"><span aria-hidden="true">[✓]</span>密码验证通过，礼物线索已解锁</p>
+    <div class="success-mark" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></div>
+    <h2 class="gift-title" id="gift-title">生日快乐！爸爸</h2>
+    <p class="gift-note">恭喜你找出了密码，现在去收下这份心意吧。</p>
+    <div class="gift-output" id="gift-description"><p class="clue-label">礼物位置</p><p class="gift-location">洗衣房最高处</p></div>
+    <p class="gift-bottom"><span class="status-dot" aria-hidden="true"></span>解密完成，祝福已送达。</p>
+    <button class="terminal-button gift-button" type="button" data-close="gift-dialog">收下祝福，去找礼物</button>
+  </div>
+</dialog>
+<noscript><p style="position:relative;padding:20px;text-align:center;color:#ecfff2">请开启浏览器的 JavaScript，解锁这份生日惊喜。</p></noscript>
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const motion = matchMedia('(prefers-reduced-motion: reduce)');
+  const passwordDialog = $('pwd-dialog'), giftDialog = $('gift-dialog');
+  const input = $('pwd-input'), error = $('pwd-error'), openButton = $('open-surprise');
+  const PASSWORD = '3953';
+  const animations = new Map();
+  let unlocked = false, actionTaken = false, transitioning = false;
+  function resetError() {
+    error.hidden = true;
+    input.removeAttribute('aria-invalid');
+    passwordDialog.classList.remove('error-shake');
+  }
+  function finishScrambles() { Array.from(animations.values()).forEach((finish) => finish()); }
+  function focusPasswordInput() {
+    // 手机先展示线索，避免软键盘一出现就挡住正文。
+    if (matchMedia('(pointer: fine)').matches) input.focus({ preventScroll: true });
+    else passwordDialog.focus({ preventScroll: true });
+  }
+  function openPasswordDialog(focusInput = true) {
+    actionTaken = true; finishScrambles(); resetError();
+    input.value = '';
+    document.body.classList.add('password-open');
+    document.querySelector('.app').hidden = true;
+    if (!passwordDialog.open) passwordDialog.showModal();
+    if (focusInput) passwordDialog.classList.add('virus-active');
+    if (focusInput) focusPasswordInput();
+  }
+  function openGiftDialog() {
+    actionTaken = true;
+    document.body.classList.add('gift-open');
+    document.querySelector('.app').hidden = true;
+    if (!giftDialog.open) giftDialog.showModal();
+  }
+
+  function scramble(el, text, glyphs, charDelay) {
+    el.classList.remove('awaiting-english');
+    const spans = Array.from(text, (char) => {
+      const span = document.createElement('span');
+      span.className = 'scramble-char'; span.textContent = char;
+      span.setAttribute('aria-hidden', 'true');
+      return span;
+    });
+    el.replaceChildren(...spans);
+    // 解密过程中固定字符宽度，避免比例字体来回跳动。
+    spans.forEach((span) => { span.style.width = span.getBoundingClientRect().width + 'px'; });
+    return new Promise((resolve) => {
+      let frameId = 0, finished = false, last = 0;
+      const start = performance.now();
+      const deadlines = spans.map((_, i) => 120 + i * charDelay + Math.random() * 100);
+      function finish() {
+        if (finished) return;
+        finished = true; cancelAnimationFrame(frameId);
+        spans.forEach((span, i) => {
+          span.textContent = text[i]; span.classList.add('locked'); span.style.width = '';
+        });
+        animations.delete(el); resolve();
+      }
+      animations.set(el, finish);
+      function frame(now) {
+        if (motion.matches || actionTaken) { finish(); return; }
+        const elapsed = now - start;
+        if (now - last >= 55) {
+          spans.forEach((span, i) => {
+            const locked = text[i] === ' ' || elapsed >= deadlines[i];
+            span.textContent = locked ? text[i] : glyphs[Math.floor(Math.random() * glyphs.length)];
+            span.classList.toggle('locked', locked);
+          });
+          last = now;
+        }
+        if (elapsed > deadlines[deadlines.length - 1] + 100) finish();
+        else frameId = requestAnimationFrame(frame);
+      }
+      if (motion.matches || actionTaken) finish();
+      else frameId = requestAnimationFrame(frame);
+    });
+  }
+
+  // 将当前画面复制成两半，沿同一条锯齿裂缝展开；不需要外部截图库。
+  async function tearOpenPassword() {
+    if (motion.matches || typeof openButton.animate !== 'function') {
+      openPasswordDialog();
+      return;
+    }
+    const width = innerWidth, height = innerHeight;
+    const app = document.querySelector('.app'), appRect = app.getBoundingClientRect();
+    const rain = $('matrix-bg');
+    const count = Math.ceil(width / 22);
+    const points = Array.from({ length: count + 1 }, (_, i) => [
+      width * i / count,
+      height / 2 + (i === 0 || i === count ? 0 : (i % 2 ? -1 : 1) * (3 + Math.random() * 7))
+    ]);
+    const pathFrom = (vertices) => vertices.map(([x, y], i) => (i ? 'L' : 'M') + x + ',' + y).join(' ');
+    const coordinates = (vertices) => vertices.map(([x, y]) => x + 'px ' + y + 'px').join(',');
+    const fullPath = pathFrom(points);
+    const svgNS = 'http://www.w3.org/2000/svg';
+    function makeSvg(className) {
+      const svg = document.createElementNS(svgNS, 'svg');
+      svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+      svg.setAttribute('class', className);
+      svg.setAttribute('aria-hidden', 'true');
+      return svg;
+    }
+    function makePath(d) {
+      const path = document.createElementNS(svgNS, 'path');
+      path.setAttribute('d', d);
+      return path;
+    }
+    function snapshotScene() {
+      const scene = document.createElement('div');
+      scene.className = 'tear-scene';
+      const rainCopy = document.createElement('canvas');
+      rainCopy.className = 'tear-matrix';
+      rainCopy.width = rain.width; rainCopy.height = rain.height;
+      rainCopy.getContext('2d')?.drawImage(rain, 0, 0);
+      scene.appendChild(rainCopy);
+      ['.shade', '.ambient', '.scanlines'].forEach((selector) => scene.appendChild(document.querySelector(selector).cloneNode(true)));
+      const copy = app.cloneNode(true);
+      copy.querySelectorAll('[id]').forEach((el) => el.removeAttribute('id'));
+      copy.inert = true;
+      Object.assign(copy.style, {
+        position: 'absolute', left: appRect.left + 'px', top: appRect.top + 'px',
+        width: appRect.width + 'px', height: appRect.height + 'px', minHeight: '0',
+        visibility: 'hidden'
+      });
+      scene.appendChild(copy);
+      return scene;
+    }
+    const cover = document.createElement('dialog');
+    cover.className = 'screen-tear';
+    cover.setAttribute('aria-label', '正在展开生日惊喜');
+    cover.tabIndex = -1;
+    cover.addEventListener('cancel', (event) => event.preventDefault());
+    const halves = [0, 1].map((index) => {
+      const half = document.createElement('div');
+      half.className = 'tear-half';
+      half.setAttribute('aria-hidden', 'true'); half.inert = true;
+      half.style.clipPath = index === 0
+        ? 'polygon(0 0,' + width + 'px 0,' + coordinates([...points].reverse()) + ')'
+        : 'polygon(' + coordinates(points) + ',' + width + 'px ' + height + 'px,0 ' + height + 'px)';
+      half.appendChild(snapshotScene());
+      const edge = makeSvg('tear-edge');
+      edge.style.opacity = '0'; edge.appendChild(makePath(fullPath));
+      half.appendChild(edge); cover.appendChild(half);
+      return half;
+    });
+    const seam = makeSvg('tear-seam');
+    const center = Math.floor(points.length / 2);
+    [points.slice(0, center + 1).reverse(), points.slice(center)].forEach((vertices) => seam.appendChild(makePath(pathFrom(vertices))));
+    cover.appendChild(seam);
+    const effects = [];
+    let finishTransition;
+    try {
+      // 密码窗口先放在底层，撕裂画面盖在它上方，缺口扩大时自然显露。
+      passwordDialog.classList.add('through-tear');
+      openPasswordDialog(false);
+      const reveal = passwordDialog.animate([
+        { opacity: 0, transform: 'scale(.96)' },
+        { opacity: 1, transform: 'scale(1)' }
+      ], { duration: 500, delay: 660, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'both' });
+      effects.push(reveal);
+      document.body.appendChild(cover); cover.showModal();
+      cover.focus({ preventScroll: true });
+      const completed = new Promise((resolve) => { finishTransition = resolve; });
+      function finishEarly() { finishTransition(); }
+      addEventListener('resize', finishEarly, { once: true });
+      document.addEventListener('visibilitychange', finishEarly, { once: true });
+      motion.addEventListener('change', finishEarly, { once: true });
+      try {
+        seam.querySelectorAll('path').forEach((path) => {
+          const length = path.getTotalLength();
+          path.style.strokeDasharray = String(length);
+          effects.push(path.animate([{ strokeDashoffset: length }, { strokeDashoffset: 0 }], {
+            duration: 330, easing: 'cubic-bezier(.3,0,.45,1)', fill: 'both'
+          }));
+        });
+        effects.push(seam.animate([{ opacity: 1 }, { opacity: 0 }], { delay: 340, duration: 220, fill: 'both' }));
+        halves.forEach((half, index) => {
+          const direction = index === 0 ? -1 : 1;
+          effects.push(half.animate([
+            { transform: 'translate3d(0,0,0)' },
+            { transform: 'translate3d(0,' + direction * 9 + 'px,0)', offset: .15 },
+            { transform: 'translate3d(0,' + direction * height * .64 + 'px,0)' }
+          ], { delay: 230, duration: 1320, easing: 'cubic-bezier(.65,0,.25,1)', fill: 'both' }));
+          effects.push(half.querySelector('.tear-edge').animate([{ opacity: 0 }, { opacity: .85 }], { delay: 160, duration: 200, fill: 'both' }));
+        });
+        await Promise.race([Promise.all(effects.map((effect) => effect.finished.catch(() => {}))), completed]);
+      } finally {
+        removeEventListener('resize', finishEarly);
+        document.removeEventListener('visibilitychange', finishEarly);
+        motion.removeEventListener('change', finishEarly);
+      }
+    } finally {
+      effects.forEach((effect) => effect.cancel());
+      if (cover.open) cover.close();
+      cover.remove();
+      // 保留这个标记到窗口关闭，避免重新触发原来的弹窗入场动画。
+      if (!passwordDialog.open) passwordDialog.classList.remove('through-tear');
+      if (passwordDialog.open && !document.hidden) focusPasswordInput();
+    }
+  }
+
+  async function enterSurprise() {
+    if (transitioning || passwordDialog.open || giftDialog.open) return;
+    actionTaken = true;
+    if (unlocked) { openGiftDialog(); return; }
+    transitioning = true; openButton.disabled = true;
+    passwordDialog.classList.remove('virus-active');
+    finishScrambles();
+    try {
+      openPasswordDialog(false);
+      passwordDialog.classList.add('virus-active');
+      focusPasswordInput();
+    }
+    finally { transitioning = false; openButton.disabled = false; }
+  }
+  async function intro() {
+    await scramble($('scramble'), '生日快乐', '龘靐齉麤龗鱻爨癵驫纛０１２３４５６７８９ＡＢＣＤＥＦ', 300);
+    await scramble($('scramble-en'), 'Happy Birthday', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', 100);
+    document.body.classList.add('intro-complete');
+  }
+
+  openButton.addEventListener('click', enterSurprise);
+  document.querySelectorAll('[data-close]').forEach((button) => {
+    button.addEventListener('click', () => $(button.dataset.close).close());
+  });
+  [passwordDialog, giftDialog].forEach((dialog) => {
+    dialog.addEventListener('close', () => {
+      if (dialog === passwordDialog) {
+        passwordDialog.classList.remove('through-tear');
+        passwordDialog.classList.remove('virus-active');
+        document.body.classList.remove('password-open');
+        if (giftDialog.open) {
+          document.body.classList.add('gift-open');
+          document.querySelector('.app').hidden = true;
+        } else {
+          document.querySelector('.app').hidden = false;
+        }
+      }
+      if (dialog === giftDialog) {
+        document.body.classList.remove('gift-open');
+        document.querySelector('.app').hidden = false;
+      }
+      // 密码框关闭并切到成功框时，不抢走新弹窗的焦点。
+      if (passwordDialog.open || giftDialog.open) return;
+      if (!unlocked) {
+      }
+      openButton.focus({ preventScroll: true });
+    });
+    dialog.addEventListener('click', (event) => {
+      const r = dialog.getBoundingClientRect();
+      if (event.target === dialog && (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom)) dialog.close();
+    });
+  });
+  input.addEventListener('input', resetError);
+  $('pwd-form').addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (input.value.trim() === PASSWORD) {
+      unlocked = true; resetError(); passwordDialog.close();
+      $('open-label').textContent = '再看一次礼物线索';
+      openGiftDialog();
+    } else {
+      input.value = ''; error.hidden = false; input.setAttribute('aria-invalid', 'true');
+      passwordDialog.classList.remove('error-shake'); void passwordDialog.offsetWidth;
+      passwordDialog.classList.add('error-shake'); input.focus({ preventScroll: true });
+    }
+  });
+
+  // 保留原版入口；礼物内容仍通过同一密码流程解锁。
+  window.startErase = enterSurprise;
+  window.openPasswordDialog = () => unlocked ? openGiftDialog() : openPasswordDialog();
+  window.openGiftDialog = () => { if (unlocked) openGiftDialog(); };
+  motion.addEventListener('change', () => {
+    if (motion.matches) finishScrambles();
+  });
+
+  // 延续原版三层景深的绿色代码雨，限制帧率并暂停后台绘制。
+  const canvas = $('matrix-bg'), ctx = canvas.getContext('2d');
+  let bgFrame = 0, last = 0, w = 0, h = 0, columns = [];
+  const CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン+-*/=<>[]{}';
+  const layers = [
+    { font: 21, gap: 29, minSpeed: 90, maxSpeed: 165, alpha: .78, trail: 17, head: '#dcffe8' },
+    { font: 13, gap: 20, minSpeed: 48, maxSpeed: 95, alpha: .39, trail: 13, head: '#89ffad' },
+    { font: 8, gap: 14, minSpeed: 25, maxSpeed: 48, alpha: .19, trail: 10, head: '#5ce88b' }
+  ];
+  const random = (min, max) => min + Math.random() * (max - min);
+  const pick = () => CHARS[Math.floor(Math.random() * CHARS.length)];
+  function resizeRain() {
+    if (!ctx) return;
+    w = innerWidth; h = innerHeight;
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    columns = layers.map((layer) => Array.from({ length: Math.ceil(w / layer.gap) }, (_, i) => ({
+      x: i * layer.gap + random(-3, 3), y: random(-h * .15, h * 1.2),
+      speed: random(layer.minSpeed, layer.maxSpeed), trail: Math.floor(random(layer.trail * .65, layer.trail + 1)), glyphs: Array.from({ length: layer.trail }, pick)
+    })));
+    drawRain(0);
+  }
+  function drawRain(dt) {
+    if (!ctx) return;
+    ctx.clearRect(0, 0, w, h); ctx.textBaseline = 'top';
+    // 远景先画，近景字符保持清楚，头部仅有轻微荧光。
+    for (let li = layers.length - 1; li >= 0; li--) {
+      const layer = layers[li];
+      ctx.font = layer.font + 'px "Courier New", monospace';
+      ctx.shadowColor = '#6bffa3';
+      for (const col of columns[li]) {
+        col.y += col.speed * dt;
+        if (dt && Math.random() < .15) col.glyphs[Math.floor(Math.random() * layer.trail)] = pick();
+        for (let j = 0; j < col.trail; j++) {
+          const y = col.y - j * layer.font;
+          if (y < -layer.font || y > h) continue;
+          ctx.globalAlpha = layer.alpha * (1 - j / col.trail);
+          ctx.shadowBlur = j === 0 && li === 0 ? 4 : 0;
+          ctx.fillStyle = j === 0 ? layer.head : '#00ff41';
+          ctx.fillText(col.glyphs[j], col.x, y);
+        }
+        if (col.y - col.trail * layer.font > h) col.y = random(-h * .4, 0);
+      }
+    }
+    ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+  }
+  function rainLoop(now) {
+    if (now - last >= 1000 / 30) { drawRain(last ? Math.min((now - last) / 1000, .08) : 0); last = now; }
+    bgFrame = requestAnimationFrame(rainLoop);
+  }
+  function syncRain() {
+    cancelAnimationFrame(bgFrame); last = 0;
+    if (ctx && !motion.matches && !document.hidden) bgFrame = requestAnimationFrame(rainLoop);
+  }
+  motion.addEventListener('change', syncRain);
+  document.addEventListener('visibilitychange', syncRain);
+  addEventListener('resize', resizeRain);
+  resizeRain(); syncRain(); intro();
+})();
+</script>
+</body>
+</html>
+
