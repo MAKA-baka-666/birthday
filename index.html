@@ -200,16 +200,18 @@
   .gift-title { font-family: var(--serif); font-size: 34px; font-weight: 400; letter-spacing: 2px; margin: 0 0 12px; line-height: 1.5; text-shadow: 0 0 30px #6bffa322; }
   .gift-location { margin: 5px 0 0; font-size: 23px; letter-spacing: 2px; color: #d1ffdf; line-height: 1.6; }
   .gift-note { margin: 0; color: #a2bdac; font-size: 12px; line-height: 1.9; }
-  .celebration-popups { display: grid; grid-template-columns: 1.08fr .92fr; align-items: stretch; gap: 9px; margin: 14px 0 8px; }
-  .celebration-window { min-width: 0; padding: 11px 13px; border: 0; border-left: 2px solid #74f59a; border-bottom: 1px solid #74f59a77; background: linear-gradient(135deg, #0b2115, #07100c); box-shadow: 0 8px 24px #0008, 0 0 20px #55ff8712; }
-  .wish-popup { clip-path: polygon(0 0, 97% 0, 100% 8%, 98% 100%, 3% 96%); }
-  .bouquet-popup { display: flex; flex-direction: column; align-items: center; justify-content: space-between; clip-path: polygon(3% 0, 100% 6%, 97% 100%, 0 94%); }
+  .celebration-window { position: fixed; z-index: 10; min-width: 0; max-height: calc(100svh - 32px); margin: 0; padding: 11px 13px; color: var(--white); font-family: var(--mono); border: 0; border-left: 2px solid #74f59a; border-bottom: 1px solid #74f59a77; background: linear-gradient(135deg, #0b2115, #07100c); box-shadow: 0 8px 24px #000b, 0 0 20px #55ff8712; overflow: auto; }
+  .wish-popup { top: max(82px, 12vh); left: max(12px, calc((100vw - 980px) / 2)); width: min(310px, calc(100vw - 24px)); clip-path: polygon(0 0, 97% 0, 100% 8%, 98% 100%, 3% 96%); }
+  .bouquet-popup { right: max(12px, calc((100vw - 980px) / 2)); bottom: max(74px, 10vh); width: min(220px, calc(100vw - 24px)); display: flex; flex-direction: column; align-items: center; justify-content: space-between; clip-path: polygon(3% 0, 100% 6%, 97% 100%, 0 94%); }
   .celebration-window-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #8ef8aa; font-size: 9px; letter-spacing: 1px; }
+  .celebration-window-head span:first-child { margin-right: auto; }
+  .celebration-symbol { color: #ffc978; font-size: 13px; }
+  .celebration-close { display: grid; place-items: center; width: 25px; height: 25px; padding: 0; color: #b9d7c1; border: 1px solid #74f59a44; background: #07100c; font: inherit; line-height: 1; cursor: pointer; }
+  .celebration-close:hover, .celebration-close:focus-visible { color: #fff; border-color: #8ef8aa; outline: 2px solid #8ef8aa55; outline-offset: 2px; }
   .celebration-window-head span:last-child { color: #ffc978; font-size: 13px; }
   .wish-popup .gift-title { margin: 15px 0 8px; font-size: clamp(23px, 5vw, 30px); line-height: 1.35; letter-spacing: 1px; }
   .wish-popup .gift-note { color: #c2d8c7; font-size: 11px; line-height: 1.8; }
   .bouquet-art { display: block; width: min(150px, 100%); height: auto; margin: 5px auto 0; filter: drop-shadow(0 5px 8px #0008); }
-  .bouquet-caption { margin: 0; color: #efd7ac; font-family: var(--serif); font-size: 12px; letter-spacing: 1px; text-align: center; }
   .gift-output { position: relative; overflow: hidden; padding: 18px 19px; margin: 23px 4px 23px 0; border: 0; border-left: 2px solid #6bffa3a6; border-bottom: 1px dashed #6bffa366; clip-path: polygon(0 0, 98% 6%, 100% 100%, 3% 94%); background: linear-gradient(120deg, #6bffa311, #6bffa302); }
   .gift-output::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, #6bffa310, transparent); pointer-events: none; }
   #gift-dialog[open] .gift-output::after { animation: output-scan .9s .25s ease both; }
@@ -259,8 +261,8 @@
   #gift-dialog.recovery-active .recover-three .recovery-alert,
   #gift-dialog.recovery-active .recover-three .recovery-done { animation-delay: .7s; }
   #gift-dialog.recovery-active .dialog-content > .prompt { animation: recovered-content .55s 2.1s cubic-bezier(.2,.8,.2,1) both; }
-  #gift-dialog.recovery-active .wish-popup { animation: celebration-window-in .6s 2.2s cubic-bezier(.2,.8,.2,1) both; }
-  #gift-dialog.recovery-active .bouquet-popup { animation: celebration-window-in .65s 2.5s cubic-bezier(.2,.8,.2,1) both; }
+  #wish-dialog[open] { animation: celebration-window-in .6s 2.2s cubic-bezier(.2,.8,.2,1) both; }
+  #bouquet-dialog[open] { animation: celebration-window-in .65s 2.5s cubic-bezier(.2,.8,.2,1) both; }
   #gift-dialog.recovery-active .dialog-content > .gift-output { animation-delay: 3s; }
   #gift-dialog.recovery-active .gift-output::after { animation-delay: 3.35s; }
   #gift-dialog.recovery-active .dialog-content > .gift-bottom,
@@ -301,10 +303,11 @@
     .recovery-log { padding: 12px 18px 0; gap: 5px; }
     .recovery-window { padding: 7px 9px; font-size: 9px; }
     .recovery-window b { font-size: 10px; }
-    .celebration-popups { grid-template-columns: 1fr; gap: 7px; margin-block: 10px 6px; }
     .celebration-window { padding: 10px 13px; }
+    .wish-popup { top: max(82px, 8vh); left: 12px; width: calc(100vw - 24px); }
+    .bouquet-popup { right: 12px; bottom: max(72px, 8vh); width: min(210px, calc(100vw - 24px)); }
     .wish-popup .gift-title { margin-top: 10px; font-size: 25px; }
-    .bouquet-art { width: min(132px, 45vw); }
+    .bouquet-art { width: min(112px, 38vw); }
     #pwd-dialog { padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); justify-content: flex-start; gap: 5px; }
     #pwd-dialog .virus-burst { display: block !important; }
     #pwd-dialog .virus-header { margin: auto 0 -5px; transform: translateX(-5px); }
@@ -487,7 +490,7 @@
     </section>
   </form>
 </dialog>
-<dialog id="gift-dialog" aria-labelledby="gift-title" aria-describedby="gift-description">
+<dialog id="gift-dialog" aria-label="礼物解锁结果" aria-describedby="gift-description">
   <header class="terminal-header">
     <span class="window-title"><svg class="icon" viewBox="0 0 20 20" aria-hidden="true"><path d="m3 5 5 5-5 5m8 0h6"/></svg>gift.unlocked</span>
     <span class="window-state">解锁成功</span>
@@ -500,15 +503,20 @@
   </div>
   <div class="dialog-content">
     <p class="prompt"><span aria-hidden="true">[✓]</span>密码验证通过，生日惊喜已解锁</p>
-    <div class="celebration-popups">
-      <section class="celebration-window wish-popup" aria-labelledby="gift-title">
-        <header class="celebration-window-head"><span>birthday.wish</span><span aria-hidden="true">✳</span></header>
-        <h2 class="gift-title" id="gift-title">生日快乐，爸爸！</h2>
-        <p class="gift-note">愿新的一岁平安顺遂、自在欢喜，每一天都被温柔以待。</p>
-      </section>
-      <section class="celebration-window bouquet-popup" aria-label="送给爸爸的一束花">
-        <header class="celebration-window-head"><span>flower.delivery</span><span aria-hidden="true">✿</span></header>
-        <svg class="bouquet-art" viewBox="0 0 180 160" role="img" aria-label="一束由粉色、黄色和紫色花朵组成的花束">
+    <div class="gift-output" id="gift-description"><p class="clue-label">礼物位置</p><p class="gift-location">洗衣房最高处</p></div>
+    <p class="gift-bottom"><span class="status-dot" aria-hidden="true"></span>解密完成，祝福已送达。</p>
+    <button class="terminal-button gift-button" type="button" data-close="gift-dialog">收下祝福，去找礼物</button>
+  </div>
+
+<dialog id="wish-dialog" class="celebration-window wish-popup" aria-labelledby="wish-title">
+  <header class="celebration-window-head"><span>birthday.wish</span><span class="celebration-symbol" aria-hidden="true">✳</span><button class="celebration-close" type="button" data-close="wish-dialog" aria-label="关闭生日祝福">×</button></header>
+  <h2 class="gift-title" id="wish-title">生日快乐，爸爸！</h2>
+  <p class="gift-note">愿新的一岁平安顺遂、自在欢喜，每一天都被温柔以待。</p>
+</dialog>
+
+<dialog id="bouquet-dialog" class="celebration-window bouquet-popup" aria-label="送给爸爸的一束花">
+  <header class="celebration-window-head"><span>flower.delivery</span><span class="celebration-symbol" aria-hidden="true">✿</span><button class="celebration-close" type="button" data-close="bouquet-dialog" aria-label="关闭花束">×</button></header>
+  <svg class="bouquet-art" viewBox="0 0 180 160" role="img" aria-label="一束由粉色、黄色和紫色花朵组成的花束">
           <path d="M90 118C81 90 66 69 50 46M91 117c-4-34 0-58 2-83m0 83c9-34 22-53 38-73m-38 73C70 93 52 85 35 79m57 39c18-21 34-30 52-36" fill="none" stroke="#77c987" stroke-width="3" stroke-linecap="round"/>
           <path d="M72 84c-15-18-29-15-31-4 10 13 22 16 31 4Zm34-14c5-20 19-25 26-16-4 15-14 22-26 16Zm-22-6c-14-13-12-26-2-29 11 10 14 21 2 29Zm-20 31C46 81 35 86 37 97c13 7 24 4 27-2Zm51 7c11-16 25-16 29-7-8 12-20 16-29 7Z" fill="#4fae72" stroke="#92e2a5" stroke-width="1.5"/>
           <path d="m63 99 54 1-14 45H76Z" fill="#ed9b9b" stroke="#ffd0bc" stroke-width="2"/>
@@ -522,13 +530,8 @@
             <g fill="#f7a879"><circle cx="36" cy="76" r="7"/><circle cx="29" cy="71" r="6"/><circle cx="43" cy="70" r="6"/><circle cx="36" cy="64" r="6"/><circle cx="37" cy="74" r="3" fill="#fff0a6"/></g>
             <g fill="#ff9bb7"><circle cx="145" cy="80" r="7"/><circle cx="138" cy="75" r="6"/><circle cx="152" cy="74" r="6"/><circle cx="145" cy="68" r="6"/><circle cx="146" cy="78" r="3" fill="#ffe07c"/></g>
           </g>
-        </svg>
-      </section>
-    </div>
-    <div class="gift-output" id="gift-description"><p class="clue-label">礼物位置</p><p class="gift-location">洗衣房最高处</p></div>
-    <p class="gift-bottom"><span class="status-dot" aria-hidden="true"></span>解密完成，祝福已送达。</p>
-    <button class="terminal-button gift-button" type="button" data-close="gift-dialog">收下祝福，去找礼物</button>
-  </div>
+  </svg>
+</dialog>
 </dialog>
 <noscript><p style="position:relative;padding:20px;text-align:center;color:#ecfff2">请开启浏览器的 JavaScript，解锁这份生日惊喜。</p></noscript>
 <script>
@@ -537,6 +540,7 @@
   const $ = (id) => document.getElementById(id);
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const passwordDialog = $('pwd-dialog'), giftDialog = $('gift-dialog');
+  const wishDialog = $('wish-dialog'), bouquetDialog = $('bouquet-dialog');
   const input = $('pwd-input'), error = $('pwd-error'), openButton = $('open-surprise');
   const PASSWORD = '3953';
   const animations = new Map();
@@ -567,6 +571,8 @@
     document.querySelector('.app').hidden = true;
     giftDialog.classList.remove('recovery-active');
     if (!giftDialog.open) giftDialog.showModal();
+    if (!wishDialog.open) wishDialog.show();
+    if (!bouquetDialog.open) bouquetDialog.show();
     giftDialog.classList.add('recovery-active');
   }
 
@@ -761,7 +767,7 @@
   document.querySelectorAll('[data-close]').forEach((button) => {
     button.addEventListener('click', () => $(button.dataset.close).close());
   });
-  [passwordDialog, giftDialog].forEach((dialog) => {
+  [passwordDialog, giftDialog, wishDialog, bouquetDialog].forEach((dialog) => {
     dialog.addEventListener('close', () => {
       if (dialog === passwordDialog) {
         passwordDialog.classList.remove('through-tear');
@@ -775,6 +781,8 @@
         }
       }
       if (dialog === giftDialog) {
+        if (wishDialog.open) wishDialog.close();
+        if (bouquetDialog.open) bouquetDialog.close();
         giftDialog.classList.remove('recovery-active');
         document.body.classList.remove('gift-open');
         document.querySelector('.app').hidden = false;
