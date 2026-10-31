@@ -200,6 +200,16 @@
   .gift-title { font-family: var(--serif); font-size: 34px; font-weight: 400; letter-spacing: 2px; margin: 0 0 12px; line-height: 1.5; text-shadow: 0 0 30px #6bffa322; }
   .gift-location { margin: 5px 0 0; font-size: 23px; letter-spacing: 2px; color: #d1ffdf; line-height: 1.6; }
   .gift-note { margin: 0; color: #a2bdac; font-size: 12px; line-height: 1.9; }
+  .celebration-popups { display: grid; grid-template-columns: 1.08fr .92fr; align-items: stretch; gap: 9px; margin: 14px 0 8px; }
+  .celebration-window { min-width: 0; padding: 11px 13px; border: 0; border-left: 2px solid #74f59a; border-bottom: 1px solid #74f59a77; background: linear-gradient(135deg, #0b2115, #07100c); box-shadow: 0 8px 24px #0008, 0 0 20px #55ff8712; }
+  .wish-popup { clip-path: polygon(0 0, 97% 0, 100% 8%, 98% 100%, 3% 96%); }
+  .bouquet-popup { display: flex; flex-direction: column; align-items: center; justify-content: space-between; clip-path: polygon(3% 0, 100% 6%, 97% 100%, 0 94%); }
+  .celebration-window-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #8ef8aa; font-size: 9px; letter-spacing: 1px; }
+  .celebration-window-head span:last-child { color: #ffc978; font-size: 13px; }
+  .wish-popup .gift-title { margin: 15px 0 8px; font-size: clamp(23px, 5vw, 30px); line-height: 1.35; letter-spacing: 1px; }
+  .wish-popup .gift-note { color: #c2d8c7; font-size: 11px; line-height: 1.8; }
+  .bouquet-art { display: block; width: min(150px, 100%); height: auto; margin: 5px auto 0; filter: drop-shadow(0 5px 8px #0008); }
+  .bouquet-caption { margin: 0; color: #efd7ac; font-family: var(--serif); font-size: 12px; letter-spacing: 1px; text-align: center; }
   .gift-output { position: relative; overflow: hidden; padding: 18px 19px; margin: 23px 4px 23px 0; border: 0; border-left: 2px solid #6bffa3a6; border-bottom: 1px dashed #6bffa366; clip-path: polygon(0 0, 98% 6%, 100% 100%, 3% 94%); background: linear-gradient(120deg, #6bffa311, #6bffa302); }
   .gift-output::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, #6bffa310, transparent); pointer-events: none; }
   #gift-dialog[open] .gift-output::after { animation: output-scan .9s .25s ease both; }
@@ -248,17 +258,18 @@
   #gift-dialog.recovery-active .recover-two .recovery-done { animation-delay: .35s; }
   #gift-dialog.recovery-active .recover-three .recovery-alert,
   #gift-dialog.recovery-active .recover-three .recovery-done { animation-delay: .7s; }
-  #gift-dialog.recovery-active .dialog-content > .prompt,
-  #gift-dialog.recovery-active .dialog-content > .gift-title,
-  #gift-dialog.recovery-active .dialog-content > .gift-note { animation: recovered-content .55s 2.1s cubic-bezier(.2,.8,.2,1) both; }
-  #gift-dialog.recovery-active .dialog-content > .success-mark { animation-delay: 2.1s; }
-  #gift-dialog.recovery-active .dialog-content > .gift-output { animation-delay: 2.45s; }
+  #gift-dialog.recovery-active .dialog-content > .prompt { animation: recovered-content .55s 2.1s cubic-bezier(.2,.8,.2,1) both; }
+  #gift-dialog.recovery-active .wish-popup { animation: celebration-window-in .6s 2.2s cubic-bezier(.2,.8,.2,1) both; }
+  #gift-dialog.recovery-active .bouquet-popup { animation: celebration-window-in .65s 2.5s cubic-bezier(.2,.8,.2,1) both; }
+  #gift-dialog.recovery-active .dialog-content > .gift-output { animation-delay: 3s; }
+  #gift-dialog.recovery-active .gift-output::after { animation-delay: 3.35s; }
   #gift-dialog.recovery-active .dialog-content > .gift-bottom,
   #gift-dialog.recovery-active .dialog-content > .gift-button { animation: recovered-content .55s 2.7s cubic-bezier(.2,.8,.2,1) both; }
   @keyframes infection-recovery { 0%, 44% { border-color: #ff5c56; background: linear-gradient(100deg, #330f12f2, #12090bf2); box-shadow: 0 5px 18px #0008, 0 0 18px #ff39301c; } 72%, 100% { border-color: #63f58e; background: linear-gradient(100deg, #092615f5, #06130cf4); box-shadow: 0 5px 18px #0008, 0 0 18px #3fff7830; } }
   @keyframes status-infected { 0%, 47% { opacity: 1; } 62%, 100% { opacity: 0; } }
   @keyframes status-restored { 0%, 48% { opacity: 0; } 65%, 100% { opacity: 1; } }
   @keyframes recovered-content { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: none; } }
+  @keyframes celebration-window-in { from { opacity: 0; transform: translateY(15px) scale(.96); } to { opacity: 1; transform: none; } }
   @keyframes symbol-lock { from { opacity: 0; transform: translate(-8px,5px) rotate(-12deg) scale(.8); } to { opacity: 1; transform: none; } }
   @keyframes clue-arrive { from { opacity: 0; transform: translate(14px,-5px); } to { opacity: 1; transform: none; } }
   @keyframes gift-confirm { 0% { opacity: 0; transform: translateY(8px) rotate(-8deg) scale(.72); } 65% { opacity: 1; transform: translateY(-2px) rotate(3deg) scale(1.08); } 100% { transform: rotate(-2deg) scale(1); } }
@@ -290,6 +301,10 @@
     .recovery-log { padding: 12px 18px 0; gap: 5px; }
     .recovery-window { padding: 7px 9px; font-size: 9px; }
     .recovery-window b { font-size: 10px; }
+    .celebration-popups { grid-template-columns: 1fr; gap: 7px; margin-block: 10px 6px; }
+    .celebration-window { padding: 10px 13px; }
+    .wish-popup .gift-title { margin-top: 10px; font-size: 25px; }
+    .bouquet-art { width: min(132px, 45vw); }
     #pwd-dialog { padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); justify-content: flex-start; gap: 5px; }
     #pwd-dialog .virus-burst { display: block !important; }
     #pwd-dialog .virus-header { margin: auto 0 -5px; transform: translateX(-5px); }
@@ -484,10 +499,33 @@
     <div class="recovery-window recover-three"><span class="recovery-alert">[!] DATA LOCKED</span><b>礼物位置仍被加密</b><span class="recovery-done">[✓] 礼物线索已解密</span></div>
   </div>
   <div class="dialog-content">
-    <p class="prompt"><span aria-hidden="true">[✓]</span>密码验证通过，礼物线索已解锁</p>
-    <div class="success-mark" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg></div>
-    <h2 class="gift-title" id="gift-title">生日快乐！爸爸</h2>
-    <p class="gift-note">恭喜你找出了密码，现在去收下这份心意吧。</p>
+    <p class="prompt"><span aria-hidden="true">[✓]</span>密码验证通过，生日惊喜已解锁</p>
+    <div class="celebration-popups">
+      <section class="celebration-window wish-popup" aria-labelledby="gift-title">
+        <header class="celebration-window-head"><span>birthday.wish</span><span aria-hidden="true">✳</span></header>
+        <h2 class="gift-title" id="gift-title">生日快乐，爸爸！</h2>
+        <p class="gift-note">愿新的一岁平安顺遂、自在欢喜，每一天都被温柔以待。</p>
+      </section>
+      <section class="celebration-window bouquet-popup" aria-label="送给爸爸的一束花">
+        <header class="celebration-window-head"><span>flower.delivery</span><span aria-hidden="true">✿</span></header>
+        <svg class="bouquet-art" viewBox="0 0 180 160" role="img" aria-label="一束由粉色、黄色和紫色花朵组成的花束">
+          <path d="M90 118C81 90 66 69 50 46M91 117c-4-34 0-58 2-83m0 83c9-34 22-53 38-73m-38 73C70 93 52 85 35 79m57 39c18-21 34-30 52-36" fill="none" stroke="#77c987" stroke-width="3" stroke-linecap="round"/>
+          <path d="M72 84c-15-18-29-15-31-4 10 13 22 16 31 4Zm34-14c5-20 19-25 26-16-4 15-14 22-26 16Zm-22-6c-14-13-12-26-2-29 11 10 14 21 2 29Zm-20 31C46 81 35 86 37 97c13 7 24 4 27-2Zm51 7c11-16 25-16 29-7-8 12-20 16-29 7Z" fill="#4fae72" stroke="#92e2a5" stroke-width="1.5"/>
+          <path d="m63 99 54 1-14 45H76Z" fill="#ed9b9b" stroke="#ffd0bc" stroke-width="2"/>
+          <path d="m71 101 37 0-11 37-14-1Z" fill="#f5c0a7"/>
+          <path d="M79 116c7 4 16 4 23 0m-20 6c5 3 12 3 17 0" fill="none" stroke="#ffdfbc" stroke-width="2"/>
+          <path d="M89 121c-12-8-16-1-10 4l11 5 11-5c6-5 2-12-10-4Z" fill="#ffcf74" stroke="#ffe3a2" stroke-width="1.5"/>
+          <g stroke="#fff0d5" stroke-width="1.5">
+            <g fill="#ff8fa0"><circle cx="49" cy="43" r="8"/><circle cx="42" cy="38" r="7"/><circle cx="56" cy="37" r="7"/><circle cx="49" cy="31" r="7"/><circle cx="50" cy="40" r="3" fill="#ffd875"/></g>
+            <g fill="#f5c75e"><circle cx="93" cy="32" r="8"/><circle cx="85" cy="27" r="7"/><circle cx="101" cy="27" r="7"/><circle cx="93" cy="20" r="7"/><circle cx="94" cy="30" r="3" fill="#fff0a6"/></g>
+            <g fill="#c59ae8"><circle cx="132" cy="43" r="8"/><circle cx="124" cy="38" r="7"/><circle cx="140" cy="37" r="7"/><circle cx="132" cy="30" r="7"/><circle cx="133" cy="41" r="3" fill="#ffe2a2"/></g>
+            <g fill="#f7a879"><circle cx="36" cy="76" r="7"/><circle cx="29" cy="71" r="6"/><circle cx="43" cy="70" r="6"/><circle cx="36" cy="64" r="6"/><circle cx="37" cy="74" r="3" fill="#fff0a6"/></g>
+            <g fill="#ff9bb7"><circle cx="145" cy="80" r="7"/><circle cx="138" cy="75" r="6"/><circle cx="152" cy="74" r="6"/><circle cx="145" cy="68" r="6"/><circle cx="146" cy="78" r="3" fill="#ffe07c"/></g>
+          </g>
+        </svg>
+        <p class="bouquet-caption">为爸爸准备的一束花</p>
+      </section>
+    </div>
     <div class="gift-output" id="gift-description"><p class="clue-label">礼物位置</p><p class="gift-location">洗衣房最高处</p></div>
     <p class="gift-bottom"><span class="status-dot" aria-hidden="true"></span>解密完成，祝福已送达。</p>
     <button class="terminal-button gift-button" type="button" data-close="gift-dialog">收下祝福，去找礼物</button>
