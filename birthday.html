@@ -303,10 +303,10 @@
     #pwd-dialog.virus-active .popup-two { animation-delay: .08s; }
     #pwd-dialog.virus-active .popup-three { animation-delay: .16s; }
     #pwd-dialog.virus-active .popup-four { animation-delay: .24s; }
-    .popup-one { top: calc(50% - 150px); left: 2%; right: auto; bottom: auto; }
-    .popup-two { top: calc(50% - 128px); right: 2%; left: auto; bottom: auto; }
-    .popup-three { top: calc(50% - 106px); left: 5%; right: auto; bottom: auto; }
-    .popup-four { top: calc(50% - 84px); right: 5%; left: auto; bottom: auto; }
+    .popup-one { top: calc(env(safe-area-inset-top) + 10px); left: 2%; right: auto; bottom: auto; }
+    .popup-two { top: calc(env(safe-area-inset-top) + 32px); right: 2%; left: auto; bottom: auto; }
+    .popup-three { bottom: calc(env(safe-area-inset-bottom) + 32px); left: 3%; top: auto; right: auto; }
+    .popup-four { bottom: calc(env(safe-area-inset-bottom) + 10px); right: 3%; top: auto; left: auto; }
     @keyframes virus-stack-in { from { opacity: 0; transform: translateY(-8px) scale(.94); } to { opacity: .45; transform: none; } }
     .terminal-header { padding-left: 20px; }
     .clue { margin-left: 3px; padding-inline: 16px; }
