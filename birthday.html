@@ -499,32 +499,32 @@
 
 <dialog id="pwd-dialog" aria-labelledby="pwd-title" aria-describedby="pwd-intro" autofocus>
   <div class="virus-burst" aria-hidden="true">
-    <div class="virus-popup popup-one"><span class="virus-bar">[!] SYSTEM WARNING</span><b>检测到异常进程</b><small>gift.exe 正在尝试绕过加密</small></div>
-    <div class="virus-popup popup-two"><span class="virus-bar">[!] MEMORY LEAK</span><b>发现隐藏数据</b><small>缓存线索：让人放松的物品</small></div>
-    <div class="virus-popup popup-three"><span class="virus-bar">[!] FILE EXPOSED</span><b>礼物档案已感染</b><small>位置数据已被密码锁定</small></div>
-    <div class="virus-popup popup-four"><span class="virus-bar">[!] ACCESS DENIED</span><b>系统拒绝猜测</b><small>请根据线索找到正确密码</small></div>
-    <div class="virus-popup popup-five"><span class="virus-bar">[!] QUARANTINE</span><b>异常数据隔离中</b><small>礼物档案遭到感染</small></div>
-    <div class="virus-popup popup-six"><span class="virus-bar">[!] FILE SCAN</span><b>正在扫描隐藏文件</b><small>检测到生日礼物数据</small></div>
+    <div class="virus-popup popup-one"><span class="virus-bar">[!] SYSTEM WARNING</span><b>检测到异常进程</b><small>未知程序正在尝试绕过防护</small></div>
+    <div class="virus-popup popup-two"><span class="virus-bar">[!] MEMORY LEAK</span><b>发现密钥残片</b><small>缓存线索：让人放松的物品</small></div>
+    <div class="virus-popup popup-three"><span class="virus-bar">[!] FILE EXPOSED</span><b>核心档案已暴露</b><small>防护权限已被临时锁定</small></div>
+    <div class="virus-popup popup-four"><span class="virus-bar">[!] ACCESS DENIED</span><b>防护权限受限</b><small>请根据线索找回防护密钥</small></div>
+    <div class="virus-popup popup-five"><span class="virus-bar">[!] QUARANTINE</span><b>异常进程隔离中</b><small>等待密钥以恢复防护</small></div>
+    <div class="virus-popup popup-six"><span class="virus-bar">[!] FILE SCAN</span><b>正在检索安全档案</b><small>已捕获一条可用线索</small></div>
   </div>
   <header class="terminal-header virus-header">
-    <span class="window-title"><svg class="icon" viewBox="0 0 20 20" aria-hidden="true"><path d="m3 5 5 5-5 5m8 0h6"/></svg>gift.unlock</span>
-    <span class="window-state">等待解锁</span>
+    <span class="window-title"><svg class="icon" viewBox="0 0 20 20" aria-hidden="true"><path d="m3 5 5 5-5 5m8 0h6"/></svg>defense.sys</span>
+    <span class="window-state">防护离线</span>
     <span aria-hidden="true" style="width:34px"></span>
   </header>
   <form class="dialog-content virus-windows" id="pwd-form" novalidate>
     <section class="virus-window virus-core">
-      <p class="prompt"><span aria-hidden="true">&gt;</span>检测到一份为爸爸准备的礼物</p>
+      <p class="prompt"><span aria-hidden="true">&gt;</span>检测到异常入侵</p>
       <div class="security-symbol" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></svg></div>
-      <h2 class="dialog-title" id="pwd-title">输入密码，解锁惊喜</h2>
-      <p class="dialog-intro" id="pwd-intro">密码藏在生活里，跟着线索找找看。</p>
+      <h2 class="dialog-title" id="pwd-title">输入防护密钥</h2>
+      <p class="dialog-intro" id="pwd-intro">沿着泄露的线索，找回防护密钥。</p>
     </section>
-    <section class="virus-window virus-clue-window"><div class="clue"><p class="clue-label">泄露的线索 // 01</p><p class="clue-text">找到家中能让人放松的物品，这样就能成功获得密码吧</p></div></section>
+    <section class="virus-window virus-clue-window"><div class="clue"><p class="clue-label">密钥线索 // 01</p><p class="clue-text">找到家中能让人放松的物品，防护密钥就藏在那里。</p></div></section>
     <section class="virus-window virus-input-window">
-      <label class="pwd-label" for="pwd-input">输入找到的密码</label>
-      <div class="password-field"><span class="input-prompt" aria-hidden="true">&gt;</span><input class="pwd-input" id="pwd-input" type="text" inputmode="numeric" placeholder="等待输入..." autocomplete="off" spellcheck="false" aria-describedby="pwd-error"/></div>
-      <p class="pwd-error" id="pwd-error" role="alert" hidden><strong>[!] 密码错误</strong><span>请不要猜测密码，完整体验线索后再试。</span></p>
-      <button class="terminal-button submit" type="submit"><span>验证密码</span><span class="button-symbol" aria-hidden="true">[ Enter ]</span></button>
-      <p class="dialog-footnote">不着急，礼物会一直等着你。</p>
+      <label class="pwd-label" for="pwd-input">防护密钥</label>
+      <div class="password-field"><span class="input-prompt" aria-hidden="true">&gt;</span><input class="pwd-input" id="pwd-input" type="text" inputmode="numeric" placeholder="等待密钥..." autocomplete="off" spellcheck="false" aria-describedby="pwd-error"/></div>
+      <p class="pwd-error" id="pwd-error" role="alert" hidden><strong>[!] 密钥不匹配</strong><span>请根据线索确认防护密钥后重试。</span></p>
+      <button class="terminal-button submit" type="submit"><span>恢复防护</span><span class="button-symbol" aria-hidden="true">[ Enter ]</span></button>
+      <p class="dialog-footnote">找到密钥后，即可恢复防护。</p>
     </section>
   </form>
 </dialog>
