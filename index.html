@@ -100,7 +100,7 @@
   #pwd-dialog .pwd-input { border-color: #ff665d70; }
   #pwd-dialog .pwd-input:focus { border-color: #ff9a8f; box-shadow: 0 0 0 3px #ff635b14, 0 0 21px #ff635b19, inset 0 2px 14px #0004; }
   .virus-burst { position: absolute; z-index: 1; inset: 0; pointer-events: none; overflow: visible; visibility: hidden; }
-  .virus-popup { position: absolute; width: min(270px, 74vw); padding: 10px 13px 12px; color: #ffe8e4; border: 1px solid #ff726a; border-left: 4px solid #ff5148; background: linear-gradient(125deg, #270d10f5, #080909f2); box-shadow: 0 8px 34px #000b, 0 0 22px #ff463433; clip-path: polygon(0 0, 96% 0, 100% 12%, 98% 100%, 4% 96%); opacity: 0; transform: scale(.4) rotate(-8deg); }
+  .virus-popup { position: absolute; width: min(270px, 74vw); padding: 10px 13px 12px; color: #ffe8e4; border: 1px solid #ff726a; border-left: 4px solid #ff5148; background: linear-gradient(125deg, #270d10, #080909); box-shadow: 0 8px 34px #000b, 0 0 22px #ff463433; clip-path: polygon(0 0, 96% 0, 100% 12%, 98% 100%, 4% 96%); opacity: 0; transform: scale(.4) rotate(-8deg); }
   .virus-bar { display: block; margin-bottom: 5px; color: #ff8279; font-size: 9px; letter-spacing: 1.4px; }
   .virus-popup b, .virus-popup small { display: block; }
   .virus-popup b { font-size: 12px; letter-spacing: .5px; }
@@ -109,6 +109,8 @@
   .popup-two { top: 25%; right: 1%; }
   .popup-three { bottom: 25%; left: 3%; }
   .popup-four { bottom: 7%; right: 2%; }
+  .popup-five { top: 14%; left: 8%; }
+  .popup-six { bottom: 14%; right: 8%; }
   #pwd-dialog.virus-active .virus-burst { visibility: visible; }
   #pwd-dialog.virus-active .virus-popup { animation: virus-popup .9s cubic-bezier(.15,.8,.2,1) both; }
   #pwd-dialog.virus-active .popup-two { animation-delay: .13s; }
@@ -299,15 +301,19 @@
     #pwd-dialog .virus-clue-window { margin-right: -4px; transform: translate(3px, -3px); }
     #pwd-dialog .virus-input-window { margin-left: -4px; transform: translate(-2px, 2px); }
     #pwd-dialog .virus-input-window .submit { min-height: 48px; }
-    #pwd-dialog.virus-active .virus-popup { width: min(230px, 64vw); padding: 7px 9px; opacity: .45; animation: virus-stack-in .42s cubic-bezier(.2,.8,.2,1) both; }
+    #pwd-dialog.virus-active .virus-popup { width: min(230px, 64vw); padding: 7px 9px; opacity: 1; animation: virus-stack-in .42s cubic-bezier(.2,.8,.2,1) both; }
     #pwd-dialog.virus-active .popup-two { animation-delay: .08s; }
-    #pwd-dialog.virus-active .popup-three { animation-delay: .16s; }
-    #pwd-dialog.virus-active .popup-four { animation-delay: .24s; }
-    .popup-one { top: calc(env(safe-area-inset-top) + 10px); left: 2%; right: auto; bottom: auto; }
-    .popup-two { top: calc(env(safe-area-inset-top) + 32px); right: 2%; left: auto; bottom: auto; }
-    .popup-three { bottom: calc(env(safe-area-inset-bottom) + 32px); left: 3%; top: auto; right: auto; }
-    .popup-four { bottom: calc(env(safe-area-inset-bottom) + 10px); right: 3%; top: auto; left: auto; }
-    @keyframes virus-stack-in { from { opacity: 0; transform: translateY(-8px) scale(.94); } to { opacity: .45; transform: none; } }
+    #pwd-dialog.virus-active .popup-five { animation-delay: .16s; }
+    #pwd-dialog.virus-active .popup-three { animation-delay: .24s; }
+    #pwd-dialog.virus-active .popup-four { animation-delay: .32s; }
+    #pwd-dialog.virus-active .popup-six { animation-delay: .4s; }
+    .popup-one { top: calc(env(safe-area-inset-top) + 6px); left: 2%; right: auto; bottom: auto; }
+    .popup-two { top: calc(env(safe-area-inset-top) + 22px); right: 2%; left: auto; bottom: auto; }
+    .popup-five { top: calc(env(safe-area-inset-top) + 38px); left: 5%; right: auto; bottom: auto; }
+    .popup-six { bottom: calc(env(safe-area-inset-bottom) + 6px); right: 5%; top: auto; left: auto; }
+    .popup-four { bottom: calc(env(safe-area-inset-bottom) + 22px); right: 2%; top: auto; left: auto; }
+    .popup-three { bottom: calc(env(safe-area-inset-bottom) + 38px); left: 2%; top: auto; right: auto; }
+    @keyframes virus-stack-in { from { opacity: 0; transform: translateY(-8px) scale(.94); } to { opacity: 1; transform: none; } }
     .terminal-header { padding-left: 20px; }
     .clue { margin-left: 3px; padding-inline: 16px; }
     .gift-output { margin-inline: 0 3px; padding-inline: 16px; }
@@ -441,6 +447,8 @@
     <div class="virus-popup popup-two"><span class="virus-bar">[!] MEMORY LEAK</span><b>发现隐藏数据</b><small>缓存线索：让人放松的物品</small></div>
     <div class="virus-popup popup-three"><span class="virus-bar">[!] FILE EXPOSED</span><b>礼物档案已感染</b><small>位置数据已被密码锁定</small></div>
     <div class="virus-popup popup-four"><span class="virus-bar">[!] ACCESS DENIED</span><b>系统拒绝猜测</b><small>请根据线索找到正确密码</small></div>
+    <div class="virus-popup popup-five"><span class="virus-bar">[!] QUARANTINE</span><b>异常数据隔离中</b><small>礼物档案遭到感染</small></div>
+    <div class="virus-popup popup-six"><span class="virus-bar">[!] FILE SCAN</span><b>正在扫描隐藏文件</b><small>检测到生日礼物数据</small></div>
   </div>
   <header class="terminal-header virus-header">
     <span class="window-title"><svg class="icon" viewBox="0 0 20 20" aria-hidden="true"><path d="m3 5 5 5-5 5m8 0h6"/></svg>gift.unlock</span>
