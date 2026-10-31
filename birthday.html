@@ -289,9 +289,9 @@
     .recovery-window { padding: 7px 9px; font-size: 9px; }
     .recovery-window b { font-size: 10px; }
     #pwd-dialog { padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); justify-content: flex-start; gap: 5px; }
-    #pwd-dialog .virus-burst { display: none !important; }
-    #pwd-dialog .virus-header { margin-bottom: -5px; transform: translateX(-5px); }
-    #pwd-dialog .virus-windows { grid-template-columns: 1fr; grid-template-areas: "core" "clue" "input"; gap: 5px; }
+    #pwd-dialog .virus-burst { display: block !important; }
+    #pwd-dialog .virus-header { margin: auto 0 -5px; transform: translateX(-5px); }
+    #pwd-dialog .virus-windows { margin: 0 0 auto; grid-template-columns: 1fr; grid-template-areas: "core" "clue" "input"; gap: 5px; }
     #pwd-dialog .virus-window { padding: 12px 14px; }
     #pwd-dialog .virus-core { grid-template-columns: 44px 1fr; column-gap: 11px; }
     #pwd-dialog .virus-core .security-symbol { width: 39px; height: 39px; }
@@ -299,11 +299,15 @@
     #pwd-dialog .virus-clue-window { margin-right: -4px; transform: translate(3px, -3px); }
     #pwd-dialog .virus-input-window { margin-left: -4px; transform: translate(-2px, 2px); }
     #pwd-dialog .virus-input-window .submit { min-height: 48px; }
-    .virus-popup { width: min(230px, 66vw); padding: 8px 10px; }
-    .popup-one { top: 5%; left: 1%; }
-    .popup-two { top: 24%; right: 1%; }
-    .popup-three { bottom: 23%; left: 1%; }
-    .popup-four { bottom: 5%; right: 2%; }
+    #pwd-dialog.virus-active .virus-popup { width: min(230px, 64vw); padding: 7px 9px; opacity: .45; animation: virus-stack-in .42s cubic-bezier(.2,.8,.2,1) both; }
+    #pwd-dialog.virus-active .popup-two { animation-delay: .08s; }
+    #pwd-dialog.virus-active .popup-three { animation-delay: .16s; }
+    #pwd-dialog.virus-active .popup-four { animation-delay: .24s; }
+    .popup-one { top: calc(50% - 150px); left: 2%; right: auto; bottom: auto; }
+    .popup-two { top: calc(50% - 128px); right: 2%; left: auto; bottom: auto; }
+    .popup-three { top: calc(50% - 106px); left: 5%; right: auto; bottom: auto; }
+    .popup-four { top: calc(50% - 84px); right: 5%; left: auto; bottom: auto; }
+    @keyframes virus-stack-in { from { opacity: 0; transform: translateY(-8px) scale(.94); } to { opacity: .45; transform: none; } }
     .terminal-header { padding-left: 20px; }
     .clue { margin-left: 3px; padding-inline: 16px; }
     .gift-output { margin-inline: 0 3px; padding-inline: 16px; }
